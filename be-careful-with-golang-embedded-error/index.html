@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="exception,golang," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Start with a example example1 example1.go (click to expand)    Here is the output">
+<meta name="keywords" content="exception,golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Be Careful with Embedded Error in Golang">
+<meta property="og:url" content="http://simonxia.com/be-careful-with-golang-embedded-error/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="Start with a example example1 example1.go (click to expand)    Here is the output">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/be-careful-with-golang-embedded-error/example1-output.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/be-careful-with-golang-embedded-error/example2-output.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-04-18T09:03:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Be Careful with Embedded Error in Golang">
+<meta name="twitter:description" content="Start with a example example1 example1.go (click to expand)    Here is the output">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/be-careful-with-golang-embedded-error/example1-output.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/be-careful-with-golang-embedded-error/"/>
+
+
+
+
+
+  <title>Be Careful with Embedded Error in Golang | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/be-careful-with-golang-embedded-error/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Be Careful with Embedded Error in Golang</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-09T12:40:02+08:00">
+                2016-10-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/be-careful-with-golang-embedded-error/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="be-careful-with-golang-embedded-error/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="start-with-a-example">Start with a example</h1>
+<h2 id="example1">example1</h2>
+<div><div class="fold_hider"><div class="close hider_title">example1.go (click to expand)</div></div><div class="fold">
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ErrorInfo <span class="keyword">struct</span> &#123;</span><br><span class="line">	Code <span class="keyword">int</span>    <span class="string">`json:"code"`</span></span><br><span class="line">	Err  <span class="keyword">string</span> <span class="string">`json:"error"`</span></span><br><span class="line">	Desc <span class="keyword">string</span> <span class="string">`json:"desc"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *ErrorInfo)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> e.Err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ErrorPointerEmbedded <span class="keyword">struct</span> &#123;</span><br><span class="line">	*ErrorInfo</span><br><span class="line">	Data <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ErrorStructEmbedded <span class="keyword">struct</span> &#123;</span><br><span class="line">	ErrorInfo</span><br><span class="line">	Data <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		pe ErrorPointerEmbedded</span><br><span class="line">		se ErrorStructEmbedded</span><br><span class="line">		ei ErrorInfo = ErrorInfo&#123;<span class="number">200</span>, <span class="string">""</span>, <span class="string">"no error here"</span>&#125;</span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">	pe.ErrorInfo = &amp;ei</span><br><span class="line">	pe.Data = <span class="number">1024</span></span><br><span class="line"></span><br><span class="line">	se.ErrorInfo = ei</span><br><span class="line">	se.Data = <span class="number">1024</span></span><br><span class="line"></span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorPointerEmbedded with %%+v: %+v\n"</span>, pe)</span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorPointerEmbedded with %%#v: %#v\n"</span>, pe)</span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorStructEmbedded with %%+v: %+v\n"</span>, se)</span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorStructEmbedded with %%#v: %#v\n"</span>, se)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<p>Here is the output</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/be-careful-with-golang-embedded-error/example1-output.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<a id="more"></a>
+<p>We got nothing printed at the first line. This is because type <code>ErrorPointerEmbedded</code> inherit <code>*ErrorInfo</code> and <code>*ErrorInfo</code> has a method <code>Error() string</code>, the method is called by <code>fmt.Printf</code> with <code>%v</code> or <code>%+v</code>. We can learn this rule from <a href="https://golang.org/pkg/fmt/" target="_blank" rel="noopener">package fmt</a></p>
+<blockquote>
+<ol start="4" type="1">
+<li>If an operand implements the error interface, the Error method will be invoked to convert the object to a string, which will then be formatted as required by the verb (if any).</li>
+</ol>
+</blockquote>
+<p>How about using <code>func (e ErrorInfo) Error() string</code> instead of <code>func (e *ErrorInfo) Error() string</code> ?</p>
+<h2 id="example2">example2</h2>
+<div><div class="fold_hider"><div class="close hider_title">example2.go (click to expand)</div></div><div class="fold">
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ErrorInfo <span class="keyword">struct</span> &#123;</span><br><span class="line">	Code <span class="keyword">int</span>    <span class="string">`json:"code"`</span></span><br><span class="line">	Err  <span class="keyword">string</span> <span class="string">`json:"error"`</span></span><br><span class="line">	Desc <span class="keyword">string</span> <span class="string">`json:"desc"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e ErrorInfo)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> e.Err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ErrorPointerEmbedded <span class="keyword">struct</span> &#123;</span><br><span class="line">	*ErrorInfo</span><br><span class="line">	Data <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ErrorStructEmbedded <span class="keyword">struct</span> &#123;</span><br><span class="line">	ErrorInfo</span><br><span class="line">	Data <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		pe ErrorPointerEmbedded</span><br><span class="line">		se ErrorStructEmbedded</span><br><span class="line">		ei ErrorInfo = ErrorInfo&#123;<span class="number">200</span>, <span class="string">""</span>, <span class="string">"no error here"</span>&#125;</span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">	pe.ErrorInfo = &amp;ei</span><br><span class="line">	pe.Data = <span class="number">1024</span></span><br><span class="line"></span><br><span class="line">	se.ErrorInfo = ei</span><br><span class="line">	se.Data = <span class="number">1024</span></span><br><span class="line"></span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorPointerEmbedded with %%+v: %+v\n"</span>, pe)</span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorPointerEmbedded with %%#v: %#v\n"</span>, pe)</span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorStructEmbedded with %%+v: %+v\n"</span>, se)</span><br><span class="line">	fmt.Printf(<span class="string">"Printf ErrorStructEmbedded with %%#v: %#v\n"</span>, se)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<p>Then we get</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/be-careful-with-golang-embedded-error/example2-output.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>This is straightforward, it’s a issue about method set in Golang. From the <a href="https://golang.org/ref/spec#Method_sets" target="_blank" rel="noopener">Go Spec</a></p>
+<blockquote>
+<p>The method set of any other named type T consists of all methods with receiver type T. The method set of the corresponding pointer type <em>T is the set of all methods with receiver </em>T or T (that is, it also contains the method set of T).</p>
+</blockquote>
+<p>This means value methods can be invoked on pointers and values, but pointer methods can only be invoked on pointers. And in <code>example2.go</code> method <code>Error() string</code> is called at the first and third line of output.</p>
+<h1 id="value-receiver-vs.pointer-receiver-in-error">Value receiver vs. Pointer receiver in Error?</h1>
+<p>As <a href="https://golang.org/doc/faq#methods_on_values_or_pointers" target="_blank" rel="noopener">Golang FAQ</a> stats</p>
+<blockquote>
+<p>For types such as basic types, slices, and small structs, a value receiver is very cheap so unless the semantics of the method requires a pointer, a value receiver is efficient and clear.</p>
+</blockquote>
+<p>It seems small error struct with value receiver is ok.</p>
+<p>And <a href="https://github.com/golang/go/wiki/CodeReviewComments#receiver-type" target="_blank" rel="noopener">Code Review comment</a> gives some useful guidelines</p>
+<blockquote>
+<ul>
+<li>If the receiver is a map, func or chan, don’t use a pointer to them. If the receiver is a slice and the method doesn’t reslice or reallocate the slice, don’t use a pointer to it.</li>
+<li>If the method needs to mutate the receiver, the receiver must be a pointer.</li>
+<li>If the receiver is a struct that contains a sync.Mutex or similar synchronizing field, the receiver must be a pointer to avoid copying.</li>
+<li>If the receiver is a large struct or array, a pointer receiver is more efficient. How large is large? Assume it’s equivalent to passing all its elements as arguments to the method. If that feels too large, it’s also too large for the receiver.</li>
+<li>Can function or methods, either concurrently or when called from this method, be mutating the receiver? A value type creates a copy of the receiver when the method is invoked, so outside updates will not be applied to this receiver. If changes must be visible in the original receiver, the receiver must be a pointer.</li>
+<li>If the receiver is a struct, array or slice and any of its elements is a pointer to something that might be mutating, prefer a pointer receiver, as it will make the intention more clear to the reader.</li>
+<li>If the receiver is a small array or struct that is naturally a value type (for instance, something like the time.Time type), with no mutable fields and no pointers, or is just a simple basic type such as int or string, a value receiver makes sense. A value receiver can reduce the amount of garbage that can be generated; if a value is passed to a value method, an on-stack copy can be used instead of allocating on the heap. (The compiler tries to be smart about avoiding this allocation, but it can’t always succeed.) Don’t choose a value receiver type for this reason without profiling first.</li>
+<li>Finally, when in doubt, use a pointer receiver.</li>
+</ul>
+</blockquote>
+<p>Diving into go standard lib, some examples in package net:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> OpError <span class="keyword">struct</span> &#123;</span><br><span class="line">        Op <span class="keyword">string</span></span><br><span class="line">        Net <span class="keyword">string</span></span><br><span class="line">        Source Addr</span><br><span class="line">        Addr Addr</span><br><span class="line">        Err error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *OpError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">DNSError</span> <span class="title">struct</span></span> &#123;</span><br><span class="line">        Err         <span class="keyword">string</span> <span class="comment">// description of the error</span></span><br><span class="line">        Name        <span class="keyword">string</span> <span class="comment">// name looked for</span></span><br><span class="line">        Server      <span class="keyword">string</span> <span class="comment">// server used</span></span><br><span class="line">        IsTimeout   <span class="keyword">bool</span>   <span class="comment">// if true, timed out; not all timeouts set this</span></span><br><span class="line">        IsTemporary <span class="keyword">bool</span>   <span class="comment">// if true, error is temporary; not all errors set this</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *DNSError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">UnknownNetworkError</span> <span class="title">string</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(e UnknownNetworkError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span></span><br></pre></td></tr></table></figure>
+<p>It seems std lib prefer to use point receiver on struct error, and use value receiver on small type such as <code>UnknownNetworkError</code>.</p>
+<h1 id="embedded-by-pointer-by-value-or-by-interface">Embedded by pointer, by value, or by interface ?</h1>
+<p>Another idiomatic style is embedded <code>error</code> interface, for example:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ErrorInterfaceEmbedded <span class="keyword">struct</span> &#123;</span><br><span class="line">	error</span><br><span class="line">	Data <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This style is widly used in std lib, such as <code>OpError</code> in previous example.</p>
+<p>Which of these three methods is better? There is no conclusive. <a href="http://www.hydrogen18.com/blog/golang-embedding.html" target="_blank" rel="noopener">Embedding in Go</a> may give some suggestions</p>
+<h1 id="conclusion">Conclusion</h1>
+<ol type="1">
+<li><p>It is a good practice to print a error embedded struct always with <code>%#v</code> instead of <code>%+v</code> or <code>%v</code> if more detail fields in struct need to be shown.</p></li>
+<li>Do as most standard lib do:
+<ul>
+<li>Using point receiver on struct error</li>
+<li>Using value receiver on small type error</li>
+</ul></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/exception/" rel="tag"># exception</a>
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/浅尝图像搜索/" rel="next" title="浅尝图像搜索">
+                <i class="fa fa-chevron-left"></i> 浅尝图像搜索
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/move-kafka-partitons-between-disks/" rel="prev" title="Moving Kafka Replica Between Disk">
+                Moving Kafka Replica Between Disk <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#start-with-a-example"><span class="nav-number">1.</span> <span class="nav-text">Start with a example</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#example1"><span class="nav-number">1.1.</span> <span class="nav-text">example1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#example2"><span class="nav-number">1.2.</span> <span class="nav-text">example2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#value-receiver-vs.pointer-receiver-in-error"><span class="nav-number">2.</span> <span class="nav-text">Value receiver vs. Pointer receiver in Error?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#embedded-by-pointer-by-value-or-by-interface"><span class="nav-number">3.</span> <span class="nav-text">Embedded by pointer, by value, or by interface ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#conclusion"><span class="nav-number">4.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "be-careful-with-golang-embedded-error/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

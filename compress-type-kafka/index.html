@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kafka," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Apache Kafka release v1.1 recently, and GZip compression performance has been increased in this version Prepare Environment three kafka brokers ran on the machine which has the following config:  CPU:">
+<meta name="keywords" content="kafka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka 1.1 Compression Compare from Producer&#39;s View">
+<meta property="og:url" content="http://simonxia.com/compress-type-kafka/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="Apache Kafka release v1.1 recently, and GZip compression performance has been increased in this version Prepare Environment three kafka brokers ran on the machine which has the following config:  CPU:">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/compress-type-kafka/compress-result.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-04-11T18:05:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kafka 1.1 Compression Compare from Producer&#39;s View">
+<meta name="twitter:description" content="Apache Kafka release v1.1 recently, and GZip compression performance has been increased in this version Prepare Environment three kafka brokers ran on the machine which has the following config:  CPU:">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/compress-type-kafka/compress-result.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/compress-type-kafka/"/>
+
+
+
+
+
+  <title>Kafka 1.1 Compression Compare from Producer's View | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/compress-type-kafka/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kafka 1.1 Compression Compare from Producer's View</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-01T22:30:26+08:00">
+                2018-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/infra/" itemprop="url" rel="index">
+                    <span itemprop="name">infra</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/compress-type-kafka/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="compress-type-kafka/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Apache Kafka release <a href="https://www.apache.org/dist/kafka/1.1.0/RELEASE_NOTES.html" target="_blank" rel="noopener">v1.1</a> recently, and GZip compression performance has been increased in this <a href="https://issues.apache.org/jira/browse/KAFKA-6430" target="_blank" rel="noopener">version</a></p>
+<h1 id="prepare">Prepare</h1>
+<h2 id="environment">Environment</h2>
+<p>three kafka brokers ran on the machine which has the following config:</p>
+<blockquote>
+<p>CPU: Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz CPU core: 48 Mem: 264028696 kB Net: 10 Gbps</p>
+<p>OS: Ubuntu 16.04.2 LTS Kafka version: 1.1.0</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="test-script">Test Script</h2>
+<p>I use the tool <code>kafka-producer-test.sh</code> ship with Kafka to compare performance of different compression type with different message and batch size. A simple script wraps <code>kafka-producer-test.sh</code> is as follows.</p>
+<div><div class="fold_hider"><div class="close hider_title">compression_test.py (click to expand)</div></div><div class="fold">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> multiprocessing</span><br><span class="line"><span class="keyword">import</span> os, subprocess, random</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">perf_one</span><span class="params">(msg_size, batch_size, compression, topic)</span>:</span></span><br><span class="line">        e = dict(os.environ)</span><br><span class="line">        e[<span class="string">'JMX_PORT'</span>] = str(random.randint(<span class="number">9500</span>,<span class="number">9876</span>))</span><br><span class="line">        producer_cmd = [<span class="string">'./kafka_2.12-1.1.0/bin/kafka-producer-perf-test.sh'</span>, <span class="string">'--topic'</span>, topic, <span class="string">'--num-records'</span>, <span class="string">'10000000'</span>, <span class="string">'--record-size'</span>, str(msg_size), <span class="string">'--throughput'</span>, <span class="string">'1000000000'</span>, <span class="string">'--producer-props'</span>, <span class="string">'acks=0'</span>, <span class="string">'bootstrap.servers=jjh720:19092'</span>,<span class="string">'batch.size=%d'</span>%batch_size]</span><br><span class="line">        <span class="keyword">if</span> len(compression) &gt; <span class="number">0</span> :</span><br><span class="line">                producer_cmd.append(<span class="string">'compression.type=%s'</span>%compression)</span><br><span class="line">        result = subprocess.run(producer_cmd, env=e, stdout=subprocess.PIPE)</span><br><span class="line">        result_str = result.stdout.decode(<span class="string">'utf-8'</span>).strip()</span><br><span class="line">        res_arr = result_str.split(<span class="string">'\n'</span>)[<span class="number">-1</span>].split(<span class="string">','</span>)</span><br><span class="line">        speed = res_arr[<span class="number">1</span>].strip().split(<span class="string">'('</span>)[<span class="number">0</span>]</span><br><span class="line">        throughout = res_arr[<span class="number">1</span>].strip().split(<span class="string">'('</span>)[<span class="number">1</span>][:<span class="number">-1</span>]</span><br><span class="line">        avg_latency = res_arr[<span class="number">2</span>].strip().split(<span class="string">' '</span>)[<span class="number">0</span>]</span><br><span class="line">        print(<span class="string">"%d,%d,%s,%s,%s,%s"</span>%(msg_size, batch_size, compression, speed, throughout, avg_latency))</span><br><span class="line"></span><br><span class="line">print(<span class="string">"msg_size,batch_size,compression,speed,throughout,avg_latency"</span>)</span><br><span class="line"><span class="keyword">for</span> ms <span class="keyword">in</span> range(<span class="number">500</span>, <span class="number">1100</span>, <span class="number">100</span>):</span><br><span class="line">        <span class="keyword">for</span> bs <span class="keyword">in</span> range(<span class="number">1000</span>, <span class="number">11000</span>, <span class="number">1000</span>):</span><br><span class="line">                <span class="keyword">for</span> c <span class="keyword">in</span> [<span class="string">"lz4"</span>, <span class="string">"gzip"</span>, <span class="string">"snappy"</span>, <span class="string">""</span>]:</span><br><span class="line">                        perf_one(ms, bs, c, <span class="string">"perf_test"</span>)</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<h1 id="result">Result</h1>
+<p>script got the following result.</p>
+<div><div class="fold_hider"><div class="close hider_title">result.txt (click to expand)</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br></pre></td><td class="code"><pre><span class="line">msg_size,batch_size,compression,speed,throughout,avg_latency</span><br><span class="line">100,1000,lz4,32944.587204 records/sec ,3.14 MB/sec,0.34</span><br><span class="line">100,1000,gzip,349650.349650 records/sec ,33.35 MB/sec,1.77</span><br><span class="line">100,1000,snappy,665335.994677 records/sec ,63.45 MB/sec,1.05</span><br><span class="line">100,1000,,500250.125063 records/sec ,47.71 MB/sec,322.23</span><br><span class="line">100,2000,lz4,32644.533673 records/sec ,3.11 MB/sec,0.34</span><br><span class="line">100,2000,gzip,367242.012486 records/sec ,35.02 MB/sec,1.97</span><br><span class="line">100,2000,snappy,718907.260963 records/sec ,68.56 MB/sec,0.90</span><br><span class="line">100,2000,,684931.506849 records/sec ,65.32 MB/sec,8.77</span><br><span class="line">100,3000,lz4,33616.835311 records/sec ,3.21 MB/sec,0.45</span><br><span class="line">100,3000,gzip,333778.371162 records/sec ,31.83 MB/sec,1.74</span><br><span class="line">100,3000,snappy,693962.526024 records/sec ,66.18 MB/sec,1.85</span><br><span class="line">100,3000,,819672.131148 records/sec ,78.17 MB/sec,1.08</span><br><span class="line">100,4000,lz4,32910.975810 records/sec ,3.14 MB/sec,0.34</span><br><span class="line">100,4000,gzip,372300.819062 records/sec ,35.51 MB/sec,1.70</span><br><span class="line">100,4000,snappy,704225.352113 records/sec ,67.16 MB/sec,0.69</span><br><span class="line">100,4000,,734214.390602 records/sec ,70.02 MB/sec,3.12</span><br><span class="line">100,5000,lz4,34645.232816 records/sec ,3.30 MB/sec,0.49</span><br><span class="line">100,5000,gzip,327439.423707 records/sec ,31.23 MB/sec,1.89</span><br><span class="line">100,5000,snappy,699790.062981 records/sec ,66.74 MB/sec,0.59</span><br><span class="line">100,5000,,782472.613459 records/sec ,74.62 MB/sec,1.16</span><br><span class="line">100,6000,lz4,33533.416049 records/sec ,3.20 MB/sec,0.42</span><br><span class="line">100,6000,gzip,370507.595406 records/sec ,35.33 MB/sec,1.61</span><br><span class="line">100,6000,snappy,728862.973761 records/sec ,69.51 MB/sec,0.94</span><br><span class="line">100,6000,,661813.368630 records/sec ,63.12 MB/sec,0.87</span><br><span class="line">100,7000,lz4,35825.600974 records/sec ,3.42 MB/sec,0.73</span><br><span class="line">100,7000,gzip,362318.840580 records/sec ,34.55 MB/sec,1.87</span><br><span class="line">100,7000,snappy,752445.447705 records/sec ,71.76 MB/sec,0.84</span><br><span class="line">100,7000,,692520.775623 records/sec ,66.04 MB/sec,1.17</span><br><span class="line">100,8000,lz4,32675.467259 records/sec ,3.12 MB/sec,0.41</span><br><span class="line">100,8000,gzip,348068.221371 records/sec ,33.19 MB/sec,1.81</span><br><span class="line">100,8000,snappy,755857.898715 records/sec ,72.08 MB/sec,0.72</span><br><span class="line">100,8000,,710732.054016 records/sec ,67.78 MB/sec,0.87</span><br><span class="line">100,9000,lz4,34057.625502 records/sec ,3.25 MB/sec,0.34</span><br><span class="line">100,9000,gzip,352236.703064 records/sec ,33.59 MB/sec,1.83</span><br><span class="line">100,9000,snappy,722021.660650 records/sec ,68.86 MB/sec,0.63</span><br><span class="line">100,9000,,722543.352601 records/sec ,68.91 MB/sec,1.02</span><br><span class="line">200,1000,lz4,34562.610168 records/sec ,6.59 MB/sec,0.51</span><br><span class="line">200,1000,gzip,301659.125189 records/sec ,57.54 MB/sec,2.11</span><br><span class="line">200,1000,snappy,606428.138266 records/sec ,115.67 MB/sec,1.05</span><br><span class="line">200,1000,,319795.330988 records/sec ,61.00 MB/sec,321.44</span><br><span class="line">200,2000,lz4,32758.959575 records/sec ,6.25 MB/sec,0.41</span><br><span class="line">200,2000,gzip,293083.235639 records/sec ,55.90 MB/sec,2.09</span><br><span class="line">200,2000,snappy,738007.380074 records/sec ,140.76 MB/sec,1.49</span><br><span class="line">200,2000,,483558.994197 records/sec ,92.23 MB/sec,187.23</span><br><span class="line">200,3000,lz4,32676.534980 records/sec ,6.23 MB/sec,0.44</span><br><span class="line">200,3000,gzip,283125.707814 records/sec ,54.00 MB/sec,2.37</span><br><span class="line">200,3000,snappy,703729.767769 records/sec ,134.23 MB/sec,1.19</span><br><span class="line">200,3000,,521376.433785 records/sec ,99.44 MB/sec,181.36</span><br><span class="line">200,4000,lz4,35138.269089 records/sec ,6.70 MB/sec,0.38</span><br><span class="line">200,4000,gzip,303490.136571 records/sec ,57.89 MB/sec,2.26</span><br><span class="line">200,4000,snappy,720980.533526 records/sec ,137.52 MB/sec,1.23</span><br><span class="line">200,4000,,600600.600601 records/sec ,114.56 MB/sec,94.15</span><br><span class="line">200,5000,lz4,32809.475376 records/sec ,6.26 MB/sec,0.37</span><br><span class="line">200,5000,gzip,274273.176083 records/sec ,52.31 MB/sec,2.30</span><br><span class="line">200,5000,snappy,675675.675676 records/sec ,128.87 MB/sec,1.45</span><br><span class="line">200,5000,,606796.116505 records/sec ,115.74 MB/sec,118.09</span><br><span class="line">200,6000,lz4,34163.506542 records/sec ,6.52 MB/sec,0.44</span><br><span class="line">200,6000,gzip,295246.530853 records/sec ,56.31 MB/sec,2.68</span><br><span class="line">200,6000,snappy,690131.124914 records/sec ,131.63 MB/sec,0.96</span><br><span class="line">200,6000,,615763.546798 records/sec ,117.45 MB/sec,113.79</span><br><span class="line">200,7000,lz4,34332.406358 records/sec ,6.55 MB/sec,0.47</span><br><span class="line">200,7000,gzip,310752.019888 records/sec ,59.27 MB/sec,2.29</span><br><span class="line">200,7000,snappy,729394.602480 records/sec ,139.12 MB/sec,0.72</span><br><span class="line">200,7000,,724637.681159 records/sec ,138.21 MB/sec,11.62</span><br><span class="line">200,8000,lz4,34458.993797 records/sec ,6.57 MB/sec,0.42</span><br><span class="line">200,8000,gzip,293772.032902 records/sec ,56.03 MB/sec,2.07</span><br><span class="line">200,8000,snappy,713775.874375 records/sec ,136.14 MB/sec,0.92</span><br><span class="line">200,8000,,665335.994677 records/sec ,126.90 MB/sec,2.19</span><br><span class="line">200,9000,lz4,34063.426099 records/sec ,6.50 MB/sec,0.39</span><br><span class="line">200,9000,gzip,294204.177699 records/sec ,56.11 MB/sec,2.27</span><br><span class="line">200,9000,snappy,718390.804598 records/sec ,137.02 MB/sec,0.98</span><br><span class="line">200,9000,,698812.019567 records/sec ,133.29 MB/sec,4.25</span><br><span class="line">300,1000,lz4,33622.486719 records/sec ,9.62 MB/sec,1.02</span><br><span class="line">300,1000,gzip,235960.358660 records/sec ,67.51 MB/sec,2.51</span><br><span class="line">300,1000,snappy,570450.656018 records/sec ,163.21 MB/sec,135.43</span><br><span class="line">300,1000,,263157.894737 records/sec ,75.29 MB/sec,318.96</span><br><span class="line">300,2000,lz4,35132.096684 records/sec ,10.05 MB/sec,0.95</span><br><span class="line">300,2000,gzip,253807.106599 records/sec ,72.61 MB/sec,2.62</span><br><span class="line">300,2000,snappy,749063.670412 records/sec ,214.31 MB/sec,9.33</span><br><span class="line">300,2000,,364166.059723 records/sec ,104.19 MB/sec,228.00</span><br><span class="line">300,3000,lz4,33552.543283 records/sec ,9.60 MB/sec,0.71</span><br><span class="line">300,3000,gzip,245338.567223 records/sec ,70.19 MB/sec,2.57</span><br><span class="line">300,3000,snappy,688231.245699 records/sec ,196.90 MB/sec,1.23</span><br><span class="line">300,3000,,444049.733570 records/sec ,127.04 MB/sec,180.76</span><br><span class="line">300,4000,lz4,32857.987777 records/sec ,9.40 MB/sec,0.39</span><br><span class="line">300,4000,gzip,239120.038259 records/sec ,68.41 MB/sec,2.71</span><br><span class="line">300,4000,snappy,646412.411118 records/sec ,184.94 MB/sec,1.37</span><br><span class="line">300,4000,,453309.156845 records/sec ,129.69 MB/sec,166.44</span><br><span class="line">300,5000,lz4,31098.395323 records/sec ,8.90 MB/sec,0.59</span><br><span class="line">300,5000,gzip,230680.507497 records/sec ,66.00 MB/sec,2.92</span><br><span class="line">300,5000,snappy,689655.172414 records/sec ,197.31 MB/sec,0.86</span><br><span class="line">300,5000,,507356.671740 records/sec ,145.16 MB/sec,147.32</span><br><span class="line">300,6000,lz4,33448.172057 records/sec ,9.57 MB/sec,0.52</span><br><span class="line">300,6000,gzip,239177.230328 records/sec ,68.43 MB/sec,2.71</span><br><span class="line">300,6000,snappy,682593.856655 records/sec ,195.29 MB/sec,0.98</span><br><span class="line">300,6000,,526315.789474 records/sec ,150.58 MB/sec,127.42</span><br><span class="line">300,7000,lz4,34719.811124 records/sec ,9.93 MB/sec,0.48</span><br><span class="line">300,7000,gzip,247157.686604 records/sec ,70.71 MB/sec,2.63</span><br><span class="line">300,7000,snappy,686341.798216 records/sec ,196.36 MB/sec,1.13</span><br><span class="line">300,7000,,498753.117207 records/sec ,142.69 MB/sec,144.28</span><br><span class="line">300,8000,lz4,35164.216893 records/sec ,10.06 MB/sec,0.44</span><br><span class="line">300,8000,gzip,243902.439024 records/sec ,69.78 MB/sec,2.66</span><br><span class="line">300,8000,snappy,583090.379009 records/sec ,166.82 MB/sec,0.81</span><br><span class="line">300,8000,,592417.061611 records/sec ,169.49 MB/sec,99.67</span><br><span class="line">300,9000,lz4,32268.473701 records/sec ,9.23 MB/sec,0.51</span><br><span class="line">300,9000,gzip,245941.957698 records/sec ,70.36 MB/sec,2.68</span><br><span class="line">300,9000,snappy,656598.818122 records/sec ,187.85 MB/sec,1.38</span><br><span class="line">300,9000,,593471.810089 records/sec ,169.79 MB/sec,106.78</span><br><span class="line">400,1000,lz4,32739.654269 records/sec ,12.49 MB/sec,0.43</span><br><span class="line">400,1000,gzip,203998.368013 records/sec ,77.82 MB/sec,1.85</span><br><span class="line">400,1000,snappy,258197.779499 records/sec ,98.49 MB/sec,348.04</span><br><span class="line">400,1000,,174794.616326 records/sec ,66.68 MB/sec,344.20</span><br><span class="line">400,2000,lz4,32063.614211 records/sec ,12.23 MB/sec,0.45</span><br><span class="line">400,2000,gzip,217580.504787 records/sec ,83.00 MB/sec,3.09</span><br><span class="line">400,2000,snappy,647249.190939 records/sec ,246.91 MB/sec,2.71</span><br><span class="line">400,2000,,272108.843537 records/sec ,103.80 MB/sec,211.19</span><br><span class="line">400,3000,lz4,34020.548411 records/sec ,12.98 MB/sec,0.58</span><br><span class="line">400,3000,gzip,230893.558070 records/sec ,88.08 MB/sec,2.80</span><br><span class="line">400,3000,snappy,626566.416040 records/sec ,239.02 MB/sec,1.53</span><br><span class="line">400,3000,,380662.352493 records/sec ,145.21 MB/sec,167.88</span><br><span class="line">400,4000,lz4,32452.781203 records/sec ,12.38 MB/sec,0.38</span><br><span class="line">400,4000,gzip,225174.510245 records/sec ,85.90 MB/sec,2.91</span><br><span class="line">400,4000,snappy,679809.653297 records/sec ,259.33 MB/sec,1.34</span><br><span class="line">400,4000,,407166.123779 records/sec ,155.32 MB/sec,150.63</span><br><span class="line">400,5000,lz4,34318.267614 records/sec ,13.09 MB/sec,0.37</span><br><span class="line">400,5000,gzip,218435.998253 records/sec ,83.33 MB/sec,2.87</span><br><span class="line">400,5000,snappy,714796.283059 records/sec ,272.67 MB/sec,1.07</span><br><span class="line">400,5000,,447227.191413 records/sec ,170.60 MB/sec,139.64</span><br><span class="line">400,6000,lz4,32184.351968 records/sec ,12.28 MB/sec,0.54</span><br><span class="line">400,6000,gzip,220994.475138 records/sec ,84.30 MB/sec,2.89</span><br><span class="line">400,6000,snappy,660066.006601 records/sec ,251.80 MB/sec,1.57</span><br><span class="line">400,6000,,464252.553389 records/sec ,177.10 MB/sec,125.75</span><br><span class="line">400,7000,lz4,32263.268269 records/sec ,12.31 MB/sec,0.48</span><br><span class="line">400,7000,gzip,213857.998289 records/sec ,81.58 MB/sec,3.14</span><br><span class="line">400,7000,snappy,644329.896907 records/sec ,245.79 MB/sec,0.93</span><br><span class="line">400,7000,,460617.227084 records/sec ,175.71 MB/sec,129.28</span><br><span class="line">400,8000,lz4,35257.201283 records/sec ,13.45 MB/sec,0.38</span><br><span class="line">400,8000,gzip,220361.392684 records/sec ,84.06 MB/sec,3.00</span><br><span class="line">400,8000,snappy,670690.811536 records/sec ,255.85 MB/sec,1.30</span><br><span class="line">400,8000,,501253.132832 records/sec ,191.21 MB/sec,104.15</span><br><span class="line">400,9000,lz4,34502.984508 records/sec ,13.16 MB/sec,0.42</span><br><span class="line">400,9000,gzip,221975.582686 records/sec ,84.68 MB/sec,2.94</span><br><span class="line">400,9000,snappy,727802.037846 records/sec ,277.63 MB/sec,1.06</span><br><span class="line">400,9000,,473484.848485 records/sec ,180.62 MB/sec,127.24</span><br><span class="line">500,1000,lz4,32319.575967 records/sec ,15.41 MB/sec,0.46</span><br><span class="line">500,1000,gzip,98087.297695 records/sec ,46.77 MB/sec,1.38</span><br><span class="line">500,1000,snappy,103896.103896 records/sec ,49.54 MB/sec,303.94</span><br><span class="line">500,1000,,112930.547713 records/sec ,53.85 MB/sec,280.65</span><br><span class="line">500,2000,lz4,33901.752721 records/sec ,16.17 MB/sec,0.39</span><br><span class="line">500,2000,gzip,196734.212079 records/sec ,93.81 MB/sec,3.22</span><br><span class="line">500,2000,snappy,579710.144928 records/sec ,276.43 MB/sec,2.28</span><br><span class="line">500,2000,,231481.481481 records/sec ,110.38 MB/sec,192.53</span><br><span class="line">500,3000,lz4,32762.179340 records/sec ,15.62 MB/sec,0.63</span><br><span class="line">500,3000,gzip,194704.049844 records/sec ,92.84 MB/sec,3.15</span><br><span class="line">500,3000,snappy,636942.675159 records/sec ,303.72 MB/sec,3.55</span><br><span class="line">500,3000,,306936.771025 records/sec ,146.36 MB/sec,158.28</span><br><span class="line">500,4000,lz4,34058.785464 records/sec ,16.24 MB/sec,0.47</span><br><span class="line">500,4000,gzip,198452.073824 records/sec ,94.63 MB/sec,3.08</span><br><span class="line">500,4000,snappy,610873.549175 records/sec ,291.29 MB/sec,1.77</span><br><span class="line">500,4000,,338983.050847 records/sec ,161.64 MB/sec,148.53</span><br><span class="line">500,5000,lz4,33358.908497 records/sec ,15.91 MB/sec,0.47</span><br><span class="line">500,5000,gzip,197316.495659 records/sec ,94.09 MB/sec,3.24</span><br><span class="line">500,5000,snappy,718907.260963 records/sec ,342.80 MB/sec,5.08</span><br><span class="line">500,5000,,377358.490566 records/sec ,179.94 MB/sec,125.13</span><br><span class="line">500,6000,lz4,32377.128796 records/sec ,15.44 MB/sec,0.75</span><br><span class="line">500,6000,gzip,180570.603106 records/sec ,86.10 MB/sec,3.59</span><br><span class="line">500,6000,snappy,718907.260963 records/sec ,342.80 MB/sec,1.83</span><br><span class="line">500,6000,,359195.402299 records/sec ,171.28 MB/sec,141.21</span><br><span class="line">500,7000,lz4,35711.734876 records/sec ,17.03 MB/sec,0.71</span><br><span class="line">500,7000,gzip,183992.640294 records/sec ,87.73 MB/sec,3.61</span><br><span class="line">500,7000,snappy,686813.186813 records/sec ,327.50 MB/sec,0.88</span><br><span class="line">500,7000,,404694.455686 records/sec ,192.97 MB/sec,125.75</span><br><span class="line">500,8000,lz4,33298.924445 records/sec ,15.88 MB/sec,0.42</span><br><span class="line">500,8000,gzip,200200.200200 records/sec ,95.46 MB/sec,3.18</span><br><span class="line">500,8000,snappy,680272.108844 records/sec ,324.38 MB/sec,0.92</span><br><span class="line">500,8000,,413564.929694 records/sec ,197.20 MB/sec,121.37</span><br><span class="line">500,9000,lz4,33514.310611 records/sec ,15.98 MB/sec,0.69</span><br><span class="line">500,9000,gzip,204457.166224 records/sec ,97.49 MB/sec,3.16</span><br><span class="line">500,9000,snappy,746268.656716 records/sec ,355.85 MB/sec,1.58</span><br><span class="line">500,9000,,466200.466200 records/sec ,222.30 MB/sec,109.59</span><br><span class="line">600,1000,lz4,32954.358214 records/sec ,18.86 MB/sec,0.41</span><br><span class="line">600,1000,gzip,33837.512266 records/sec ,19.36 MB/sec,1.48</span><br><span class="line">600,1000,snappy,108342.361863 records/sec ,61.99 MB/sec,291.09</span><br><span class="line">600,1000,,103960.910698 records/sec ,59.49 MB/sec,303.49</span><br><span class="line">600,2000,lz4,32162.614177 records/sec ,18.40 MB/sec,0.42</span><br><span class="line">600,2000,gzip,168067.226891 records/sec ,96.17 MB/sec,3.63</span><br><span class="line">600,2000,snappy,535045.478866 records/sec ,306.16 MB/sec,5.95</span><br><span class="line">600,2000,,225377.507325 records/sec ,128.96 MB/sec,197.16</span><br><span class="line">600,3000,lz4,33554.794980 records/sec ,19.20 MB/sec,0.44</span><br><span class="line">600,3000,gzip,167560.321716 records/sec ,95.88 MB/sec,3.78</span><br><span class="line">600,3000,snappy,673854.447439 records/sec ,385.58 MB/sec,2.09</span><br><span class="line">600,3000,,267809.319764 records/sec ,153.24 MB/sec,146.92</span><br><span class="line">600,4000,lz4,32936.991535 records/sec ,18.85 MB/sec,0.74</span><br><span class="line">600,4000,gzip,168890.390137 records/sec ,96.64 MB/sec,3.59</span><br><span class="line">600,4000,snappy,675219.446320 records/sec ,386.36 MB/sec,1.58</span><br><span class="line">600,4000,,289351.851852 records/sec ,165.57 MB/sec,149.50</span><br><span class="line">600,5000,lz4,35303.254960 records/sec ,20.20 MB/sec,0.71</span><br><span class="line">600,5000,gzip,172562.553926 records/sec ,98.74 MB/sec,3.51</span><br><span class="line">600,5000,snappy,674308.833446 records/sec ,385.84 MB/sec,1.38</span><br><span class="line">600,5000,,326264.274062 records/sec ,186.69 MB/sec,139.46</span><br><span class="line">600,6000,lz4,35273.368607 records/sec ,20.18 MB/sec,0.70</span><br><span class="line">600,6000,gzip,167140.230654 records/sec ,95.64 MB/sec,3.60</span><br><span class="line">600,6000,snappy,706214.689266 records/sec ,404.10 MB/sec,1.24</span><br><span class="line">600,6000,,351741.118537 records/sec ,201.27 MB/sec,120.80</span><br><span class="line">600,7000,lz4,33762.112158 records/sec ,19.32 MB/sec,0.50</span><br><span class="line">600,7000,gzip,172354.360565 records/sec ,98.62 MB/sec,3.65</span><br><span class="line">600,7000,snappy,638977.635783 records/sec ,365.63 MB/sec,1.28</span><br><span class="line">600,7000,,350262.697023 records/sec ,200.42 MB/sec,125.27</span><br><span class="line">600,8000,lz4,35319.464557 records/sec ,20.21 MB/sec,0.87</span><br><span class="line">600,8000,gzip,169462.802915 records/sec ,96.97 MB/sec,3.67</span><br><span class="line">600,8000,snappy,669792.364367 records/sec ,383.26 MB/sec,1.27</span><br><span class="line">600,8000,,397140.587768 records/sec ,227.25 MB/sec,110.43</span><br><span class="line">600,9000,lz4,33460.483169 records/sec ,19.15 MB/sec,0.54</span><br><span class="line">600,9000,gzip,171939.477304 records/sec ,98.38 MB/sec,3.69</span><br><span class="line">600,9000,snappy,715307.582260 records/sec ,409.30 MB/sec,1.66</span><br><span class="line">600,9000,,382116.927780 records/sec ,218.65 MB/sec,111.99</span><br><span class="line">700,1000,lz4,34240.712207 records/sec ,22.86 MB/sec,0.43</span><br><span class="line">700,1000,gzip,34752.389227 records/sec ,23.20 MB/sec,1.82</span><br><span class="line">700,1000,snappy,101832.993890 records/sec ,67.98 MB/sec,307.76</span><br><span class="line">700,1000,,105552.037154 records/sec ,70.46 MB/sec,299.11</span><br><span class="line">700,2000,lz4,34564.999482 records/sec ,23.07 MB/sec,0.99</span><br><span class="line">700,2000,gzip,162364.020133 records/sec ,108.39 MB/sec,3.45</span><br><span class="line">700,2000,snappy,430663.221361 records/sec ,287.50 MB/sec,224.68</span><br><span class="line">700,2000,,172801.105927 records/sec ,115.36 MB/sec,179.99</span><br><span class="line">700,3000,lz4,33992.793528 records/sec ,22.69 MB/sec,0.70</span><br><span class="line">700,3000,gzip,153917.192550 records/sec ,102.75 MB/sec,3.80</span><br><span class="line">700,3000,snappy,623052.959502 records/sec ,415.93 MB/sec,13.57</span><br><span class="line">700,3000,,250375.563345 records/sec ,167.14 MB/sec,157.58</span><br><span class="line">700,4000,lz4,34247.748211 records/sec ,22.86 MB/sec,0.51</span><br><span class="line">700,4000,gzip,156666.144446 records/sec ,104.59 MB/sec,3.83</span><br><span class="line">700,4000,snappy,623441.396509 records/sec ,416.19 MB/sec,2.51</span><br><span class="line">700,4000,,273747.604708 records/sec ,182.75 MB/sec,134.82</span><br><span class="line">700,5000,lz4,33627.009214 records/sec ,22.45 MB/sec,0.60</span><br><span class="line">700,5000,gzip,152415.790276 records/sec ,101.75 MB/sec,4.02</span><br><span class="line">700,5000,snappy,616522.811344 records/sec ,411.57 MB/sec,2.82</span><br><span class="line">700,5000,,304506.699147 records/sec ,203.28 MB/sec,116.67</span><br><span class="line">700,6000,lz4,34379.619761 records/sec ,22.95 MB/sec,0.64</span><br><span class="line">700,6000,gzip,154726.907009 records/sec ,103.29 MB/sec,3.84</span><br><span class="line">700,6000,snappy,628140.703518 records/sec ,419.33 MB/sec,1.37</span><br><span class="line">700,6000,,331785.003318 records/sec ,221.49 MB/sec,116.54</span><br><span class="line">700,7000,lz4,32928.315058 records/sec ,21.98 MB/sec,0.49</span><br><span class="line">700,7000,gzip,159159.637116 records/sec ,106.25 MB/sec,3.77</span><br><span class="line">700,7000,snappy,656598.818122 records/sec ,438.33 MB/sec,2.09</span><br><span class="line">700,7000,,343288.705802 records/sec ,229.17 MB/sec,109.42</span><br><span class="line">700,8000,lz4,34520.850594 records/sec ,23.05 MB/sec,0.60</span><br><span class="line">700,8000,gzip,150150.150150 records/sec ,100.24 MB/sec,4.02</span><br><span class="line">700,8000,snappy,668002.672011 records/sec ,445.94 MB/sec,1.75</span><br><span class="line">700,8000,,334224.598930 records/sec ,223.12 MB/sec,115.92</span><br><span class="line">700,9000,lz4,36690.515502 records/sec ,24.49 MB/sec,0.84</span><br><span class="line">700,9000,gzip,153940.886700 records/sec ,102.77 MB/sec,3.91</span><br><span class="line">700,9000,snappy,739098.300074 records/sec ,493.40 MB/sec,1.24</span><br><span class="line">700,9000,,322997.416021 records/sec ,215.62 MB/sec,118.36</span><br><span class="line">800,1000,lz4,33660.966743 records/sec ,25.68 MB/sec,0.57</span><br><span class="line">800,1000,gzip,31950.923382 records/sec ,24.38 MB/sec,4.75</span><br><span class="line">800,1000,snappy,95877.277085 records/sec ,73.15 MB/sec,328.75</span><br><span class="line">800,1000,,105185.652677 records/sec ,80.25 MB/sec,301.86</span><br><span class="line">800,2000,lz4,32219.608854 records/sec ,24.58 MB/sec,0.55</span><br><span class="line">800,2000,gzip,150534.397110 records/sec ,114.85 MB/sec,2.95</span><br><span class="line">800,2000,snappy,386996.904025 records/sec ,295.26 MB/sec,168.16</span><br><span class="line">800,2000,,172265.288544 records/sec ,131.43 MB/sec,181.25</span><br><span class="line">800,3000,lz4,36189.924725 records/sec ,27.61 MB/sec,0.89</span><br><span class="line">800,3000,gzip,144300.144300 records/sec ,110.09 MB/sec,4.07</span><br><span class="line">800,3000,snappy,610128.126907 records/sec ,465.49 MB/sec,2.56</span><br><span class="line">800,3000,,224466.891134 records/sec ,171.25 MB/sec,133.37</span><br><span class="line">800,4000,lz4,33905.201058 records/sec ,25.87 MB/sec,0.53</span><br><span class="line">800,4000,gzip,152137.532329 records/sec ,116.07 MB/sec,3.98</span><br><span class="line">800,4000,snappy,709219.858156 records/sec ,541.09 MB/sec,3.51</span><br><span class="line">800,4000,,257334.019557 records/sec ,196.33 MB/sec,117.22</span><br><span class="line">800,5000,lz4,33978.933062 records/sec ,25.92 MB/sec,0.45</span><br><span class="line">800,5000,gzip,144654.997830 records/sec ,110.36 MB/sec,4.03</span><br><span class="line">800,5000,snappy,665778.961385 records/sec ,507.95 MB/sec,2.25</span><br><span class="line">800,5000,,288766.965059 records/sec ,220.31 MB/sec,122.60</span><br><span class="line">800,6000,lz4,34321.801208 records/sec ,26.19 MB/sec,0.67</span><br><span class="line">800,6000,gzip,150738.619234 records/sec ,115.00 MB/sec,3.92</span><br><span class="line">800,6000,snappy,656167.979003 records/sec ,500.62 MB/sec,1.74</span><br><span class="line">800,6000,,273074.822501 records/sec ,208.34 MB/sec,126.54</span><br><span class="line">800,7000,lz4,36281.837312 records/sec ,27.68 MB/sec,1.47</span><br><span class="line">800,7000,gzip,152671.755725 records/sec ,116.48 MB/sec,3.89</span><br><span class="line">800,7000,snappy,664893.617021 records/sec ,507.27 MB/sec,2.96</span><br><span class="line">800,7000,,276931.597895 records/sec ,211.28 MB/sec,121.77</span><br><span class="line">800,8000,lz4,37248.109658 records/sec ,28.42 MB/sec,0.69</span><br><span class="line">800,8000,gzip,147819.660015 records/sec ,112.78 MB/sec,3.85</span><br><span class="line">800,8000,snappy,695894.224078 records/sec ,530.93 MB/sec,1.27</span><br><span class="line">800,8000,,289939.112786 records/sec ,221.21 MB/sec,116.32</span><br><span class="line">800,9000,lz4,36553.715685 records/sec ,27.89 MB/sec,0.57</span><br><span class="line">800,9000,gzip,140469.167018 records/sec ,107.17 MB/sec,4.12</span><br><span class="line">800,9000,snappy,704225.352113 records/sec ,537.28 MB/sec,2.71</span><br><span class="line">800,9000,,312695.434647 records/sec ,238.57 MB/sec,111.76</span><br><span class="line">900,1000,lz4,32237.266280 records/sec ,27.67 MB/sec,0.43</span><br><span class="line">900,1000,gzip,30519.440884 records/sec ,26.20 MB/sec,1.59</span><br><span class="line">900,1000,snappy,97106.234220 records/sec ,83.35 MB/sec,321.75</span><br><span class="line">900,1000,,102585.145671 records/sec ,88.05 MB/sec,308.57</span><br><span class="line">900,2000,lz4,31028.918952 records/sec ,26.63 MB/sec,0.42</span><br><span class="line">900,2000,gzip,127113.257913 records/sec ,109.10 MB/sec,2.61</span><br><span class="line">900,2000,snappy,174886.323889 records/sec ,150.11 MB/sec,178.71</span><br><span class="line">900,2000,,165508.109897 records/sec ,142.06 MB/sec,188.85</span><br><span class="line">900,3000,lz4,35843.578623 records/sec ,30.76 MB/sec,1.84</span><br><span class="line">900,3000,gzip,136035.913481 records/sec ,116.76 MB/sec,4.03</span><br><span class="line">900,3000,snappy,529100.529101 records/sec ,454.13 MB/sec,38.18</span><br><span class="line">900,3000,,202963.263649 records/sec ,174.20 MB/sec,152.13</span><br><span class="line">900,4000,lz4,34470.872113 records/sec ,29.59 MB/sec,0.61</span><br><span class="line">900,4000,gzip,141602.945341 records/sec ,121.54 MB/sec,3.90</span><br><span class="line">900,4000,snappy,623830.318153 records/sec ,535.44 MB/sec,2.03</span><br><span class="line">900,4000,,226705.962367 records/sec ,194.58 MB/sec,134.40</span><br><span class="line">900,5000,lz4,36722.852631 records/sec ,31.52 MB/sec,0.96</span><br><span class="line">900,5000,gzip,141924.496168 records/sec ,121.81 MB/sec,3.84</span><br><span class="line">900,5000,snappy,599520.383693 records/sec ,514.57 MB/sec,4.04</span><br><span class="line">900,5000,,251319.426992 records/sec ,215.71 MB/sec,120.15</span><br><span class="line">900,6000,lz4,32607.277944 records/sec ,27.99 MB/sec,0.76</span><br><span class="line">900,6000,gzip,137684.152554 records/sec ,118.18 MB/sec,3.92</span><br><span class="line">900,6000,snappy,686813.186813 records/sec ,589.50 MB/sec,2.45</span><br><span class="line">900,6000,,269179.004038 records/sec ,231.04 MB/sec,111.54</span><br><span class="line">900,7000,lz4,37797.180330 records/sec ,32.44 MB/sec,0.99</span><br><span class="line">900,7000,gzip,136612.021858 records/sec ,117.26 MB/sec,4.02</span><br><span class="line">900,7000,snappy,728862.973761 records/sec ,625.59 MB/sec,1.10</span><br><span class="line">900,7000,,277700.638711 records/sec ,238.35 MB/sec,107.58</span><br><span class="line">900,8000,lz4,34837.136387 records/sec ,29.90 MB/sec,0.64</span><br><span class="line">900,8000,gzip,145985.401460 records/sec ,125.30 MB/sec,3.79</span><br><span class="line">900,8000,snappy,699790.062981 records/sec ,600.63 MB/sec,2.41</span><br><span class="line">900,8000,,300030.003000 records/sec ,257.52 MB/sec,98.75</span><br><span class="line">900,9000,lz4,34097.108565 records/sec ,29.27 MB/sec,0.98</span><br><span class="line">900,9000,gzip,142836.737609 records/sec ,122.60 MB/sec,3.74</span><br><span class="line">900,9000,snappy,667556.742323 records/sec ,572.97 MB/sec,1.32</span><br><span class="line">900,9000,,291375.291375 records/sec ,250.09 MB/sec,101.66</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<p>and plot the result</p>
+<div><div class="fold_hider"><div class="close hider_title">plot.py (click to expand)</div></div><div class="fold">
+ 
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line">d = pd.read_csv(<span class="string">'output.csv'</span>)</span><br><span class="line">d[<span class="string">'speed'</span>] = d[<span class="string">'speed'</span>].apply(<span class="keyword">lambda</span> x: float(x.strip().split(<span class="string">' '</span>)[<span class="number">0</span>]))</span><br><span class="line">d[<span class="string">'throughout'</span>] = d[<span class="string">'throughout'</span>].apply(<span class="keyword">lambda</span> x: float(x.strip().split(<span class="string">' '</span>)[<span class="number">0</span>]))</span><br><span class="line"></span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax = fig.add_subplot(<span class="number">131</span>, projection=<span class="string">'3d'</span>)</span><br><span class="line">ax1 = fig.add_subplot(<span class="number">132</span>, projection=<span class="string">'3d'</span>)</span><br><span class="line">ax2 = fig.add_subplot(<span class="number">133</span>, projection=<span class="string">'3d'</span>)</span><br><span class="line"></span><br><span class="line">plot = &#123;</span><br><span class="line">    ax: <span class="string">'avg_latency'</span>,        </span><br><span class="line">    ax1: <span class="string">'speed'</span>,        </span><br><span class="line">    ax2: <span class="string">'throughout'</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> a, tag <span class="keyword">in</span> plot.items():</span><br><span class="line">    <span class="keyword">for</span> t, c <span class="keyword">in</span> zip([<span class="string">"gzip"</span>, <span class="string">"snappy"</span>, <span class="string">"lz4"</span>], [<span class="string">'r'</span>, <span class="string">'b'</span>, <span class="string">'y'</span>]):</span><br><span class="line">        a.scatter(d[d[<span class="string">'compression'</span>]==t][<span class="string">'msg_size'</span>].values, d[d[<span class="string">'compression'</span>]==t][<span class="string">'batch_size'</span>].values, zs=d[d[<span class="string">'compression'</span>]==t][tag].values, color=c, label=t)</span><br><span class="line">    a.scatter(d[d[<span class="string">'compression'</span>].isnull()][<span class="string">'msg_size'</span>].values, d[d[<span class="string">'compression'</span>].isnull()][<span class="string">'batch_size'</span>].values, zs=d[d[<span class="string">'compression'</span>].isnull()][tag].values, color=<span class="string">'g'</span>, label=<span class="string">'none'</span>)</span><br><span class="line">    a.set_xlabel(<span class="string">'msg_size'</span>)</span><br><span class="line">    a.set_ylabel(<span class="string">'batch_size'</span>)</span><br><span class="line">    a.set_zlabel(tag)</span><br><span class="line">    a.legend()</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/compress-type-kafka/compress-result.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>There’re three subplots with different z-axis</p>
+<ul>
+<li><p>avg_latency means the average time to produce a record successfully, which is a round trip between producer and broker</p></li>
+<li><p>speed means how many record produced in a second</p></li>
+<li><p>throughout equals speed * message size</p></li>
+</ul>
+<p>From the figure, when batch_size &gt; 5000, msg_size &gt; 500:</p>
+<ul>
+<li>lz4, snappy, gzip are comparable in terms of write latency and are better than uncompressed messages</li>
+<li>In terms of speed, gzip is significantly better than lz4, uncompressed is about twice as fast as gzip, and snappy is about three times faster than gzip</li>
+</ul>
+<p>In terms of throughput, there has been a trend of snappy&gt; uncompressed&gt; gzip&gt; lz4, and the gap among them has increased significantly when msg_size and batch_size grows</p>
+<p>In general, snappy performs best from producer’s view</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kafka/" rel="tag"># kafka</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/kafka-controller-prospects/" rel="next" title="Kafka Controller 前瞻">
+                <i class="fa fa-chevron-left"></i> Kafka Controller 前瞻
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#prepare"><span class="nav-number">1.</span> <span class="nav-text">Prepare</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#environment"><span class="nav-number">1.1.</span> <span class="nav-text">Environment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#test-script"><span class="nav-number">1.2.</span> <span class="nav-text">Test Script</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#result"><span class="nav-number">2.</span> <span class="nav-text">Result</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "compress-type-kafka/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="图像搜索,python," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近和几个同学做了一个比赛，图片搜索，从15万张衣服和15万张鞋的图片中找出与目标图片最匹配的图。 整个过程还是挺有意思，以前没接触过图像处理方面的东西，在逐渐地深入之后才发现其博大精深。今天稍作整理，把所做工作小结在此。 概述 完成这个过程大致有如下几步， 首先建立搜索引擎：  提取每张图片特征 根据特征为所有图片建立索引  针对目标图片的搜索则以上述过程为基础，继续：  提取目标图片特征 计算">
+<meta name="keywords" content="图像搜索,python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅尝图像搜索">
+<meta property="og:url" content="http://simonxia.com/浅尝图像搜索/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="最近和几个同学做了一个比赛，图片搜索，从15万张衣服和15万张鞋的图片中找出与目标图片最匹配的图。 整个过程还是挺有意思，以前没接触过图像处理方面的东西，在逐渐地深入之后才发现其博大精深。今天稍作整理，把所做工作小结在此。 概述 完成这个过程大致有如下几步， 首先建立搜索引擎：  提取每张图片特征 根据特征为所有图片建立索引  针对目标图片的搜索则以上述过程为基础，继续：  提取目标图片特征 计算">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/3clothes.png">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/otsu_clothes1.png">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/otsu_clothes2.png">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/otsu_clothes3.png">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/shoe.png">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/result_clothes1.png">
+<meta property="og:updated_time" content="2018-02-02T17:31:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅尝图像搜索">
+<meta name="twitter:description" content="最近和几个同学做了一个比赛，图片搜索，从15万张衣服和15万张鞋的图片中找出与目标图片最匹配的图。 整个过程还是挺有意思，以前没接触过图像处理方面的东西，在逐渐地深入之后才发现其博大精深。今天稍作整理，把所做工作小结在此。 概述 完成这个过程大致有如下几步， 首先建立搜索引擎：  提取每张图片特征 根据特征为所有图片建立索引  针对目标图片的搜索则以上述过程为基础，继续：  提取目标图片特征 计算">
+<meta name="twitter:image" content="http://blog-imonxia.qiniudn.com/3clothes.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/浅尝图像搜索/"/>
+
+
+
+
+
+  <title>浅尝图像搜索 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/浅尝图像搜索/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">浅尝图像搜索</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-28T14:30:00+08:00">
+                2016-01-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/浅尝图像搜索/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="浅尝图像搜索/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近和几个同学做了一个<a href="http://pkbigdata.com/c/00000000057" target="_blank" rel="noopener">比赛</a>，图片搜索，从15万张衣服和15万张鞋的图片中找出与目标图片最匹配的图。</p>
+<p>整个过程还是挺有意思，以前没接触过图像处理方面的东西，在逐渐地深入之后才发现其博大精深。今天稍作整理，把所做工作小结在此。</p>
+<h1 id="概述">概述</h1>
+<p>完成这个过程大致有如下几步， 首先建立搜索引擎：</p>
+<ul>
+<li>提取每张图片特征</li>
+<li>根据特征为所有图片建立索引</li>
+</ul>
+<p>针对目标图片的搜索则以上述过程为基础，继续：</p>
+<ul>
+<li>提取目标图片特征</li>
+<li>计算目标图片与所有图片的相似度</li>
+<li>将相似度倒排，取需要的前N张</li>
+</ul>
+<p><a id="more"></a></p>
+<h1 id="特征提取">特征提取</h1>
+<p>图像特征包含的内容太多，颜色，纹理，形状，内容等等无一不可作为其特征描述。仅图像特征描述一个方向，就有无数的科研工作者倾尽心血，诞生了不少经典的算法，比如大名鼎鼎的SIFT。</p>
+<h1 id="颜色特征">颜色特征</h1>
+<h2 id="色彩模型">色彩模型</h2>
+<p>对于图像最直观的颜色特征，其抽象描述的数学模型——<a href="http://zh.wikipedia.org/wiki/%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93" target="_blank" rel="noopener">颜色空间</a>也分为好几大类</p>
+<h3 id="rgb颜色模型"><a href="http://zh.wikipedia.org/wiki/%E4%B8%89%E5%8E%9F%E8%89%B2%E5%85%89%E6%A8%A1%E5%BC%8F" target="_blank" rel="noopener">RGB颜色模型</a></h3>
+<p>即通过红绿蓝三色混合描述各种颜色，它是最为常见的一种颜色描述，从电子显像管时代就被广泛应用。每个色彩可被表示为一个从[0,0,0]到[255,255,255]的三维向量。</p>
+<p>但它的缺点很明显，因为RGB颜色空间内的欧氏距离与人类对颜色感知距离不成线性关系，也就是说它不是一个均匀视觉的颜色空间，颜色空间上的距离，并不代表人眼视觉上的颜色相似性。</p>
+<p>另一方面，R、G、B三个方向的分量并不是相互独立的，当改变一个颜色时，三个通道上的颜色全部需要修改，无法单独处理某个分量内容</p>
+<h3 id="hsv颜色模型"><a href="http://zh.wikipedia.org/wiki/HSL%E5%92%8CHSV%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4" target="_blank" rel="noopener">HSV颜色模型</a></h3>
+<p>HSV分别表示：</p>
+<ul>
+<li><a href="http://zh.wikipedia.org/wiki/%E8%89%B2%E7%9B%B8" target="_blank" rel="noopener">色相（Hue）</a>：通俗地说就是颜色的种类，与光的波长有关。</li>
+<li><a href="http://zh.wikipedia.org/wiki/%E8%89%B2%E5%BA%A6_%28%E8%89%B2%E5%BD%A9%E5%AD%A6%29" target="_blank" rel="noopener">饱和度（Saturation）</a>：主要指色彩纯度，与光线强弱和在不同波长的强度分布有关。</li>
+<li>明度（Value）对应白光的参入量。</li>
+</ul>
+<p>相比RGB对颜色的描述，HSV颜色模型更接近人的视觉特征。</p>
+<p><a href="http://zh.wikipedia.org/wiki/HSL%E5%92%8CHSV%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4#.E4.BB.8ERGB.E5.88.B0HSL.E6.88.96HSV.E7.9A.84.E8.BD.AC.E6.8D.A2" target="_blank" rel="noopener">RGB到HSV转换</a></p>
+<p><span class="math display">\[h =\left\{\begin{matrix} 
+0^{\circ}  &amp; if\ max = min\\
+60^{\circ}\times (\frac{g-b}{max-min})+0^{\circ} &amp; if\ max = r\ and\ g\geq b\\
+60^{\circ}\times (\frac{g-b}{max-min})+360^{\circ} &amp;if\ max = r \ and \ g &lt; b\\
+60^{\circ}\times (\frac{b-r}{max-min})+120^{\circ} &amp;if\ max = g\\
+60^{\circ}\times (\frac{r-g}{max-min})+240^{\circ} &amp;if\ max = b \\
+\end{matrix}\right.\\ \]</span></p>
+<p><span class="math display">\[ s = \left\{\begin{matrix}
+0 &amp;if\ max = 0\\
+ \frac{max - min}{max + min}&amp; otherwise
+\end{matrix}\right.\\ \]</span></p>
+<p><span class="math display">\[v = max\]</span></p>
+<h3 id="颜色矩"><a href="http://en.wikipedia.org/wiki/Wikipedia:Color_moments" target="_blank" rel="noopener">颜色矩</a></h3>
+<p>颜色空间向量仅仅描述了颜色的分布，并没有包含分布的详细信息，如方差，均值等。 颜色矩通过低三阶矩很好地描述了这些特性，简单概括如下，更详细的信息见<a href="http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/AV0405/KEEN/av_as2_nkeen.pdf" target="_blank" rel="noopener">论文：Color Moments</a></p>
+<ul>
+<li>一阶矩描述平均颜色</li>
+</ul>
+<div>
+<span class="math display">\[\mu _{c} = \frac{1}{MN}\sum_{i = 1}^{M}\sum_{j = 1}^{N}p_{ij}^{c} \]</span>
+</div>
+<ul>
+<li>二阶矩描述标准偏差</li>
+</ul>
+<div>
+<span class="math display">\[\sigma  _{c} = [\frac{1}{MN}\sum_{i = 1}^{M}\sum_{j = 1}^{N}(p_{ij}^{c} - \mu _{c})^{2}]^{\frac{1}{2}}\]</span>
+</div>
+<ul>
+<li>三阶矩描述颜色倾斜度</li>
+</ul>
+<div>
+<span class="math display">\[\theta _{c}  = [\frac{1}{MN}\sum_{i = 1}^{M}\sum_{j = 1}^{N}(p_{ij}^{c} - \mu _{c})^{3}]^{\frac{1}{3}}\]</span>
+</div>
+<p>其中MN分别表示M行N列个像素点，c表示地c个颜色分量。 对于一个RGB三通道的图像，可通过颜色矩得到一个9维的特征向量</p>
+<h2 id="色彩量化">色彩量化</h2>
+<h3 id="rgb量化">RGB量化</h3>
+<p>直接对颜色直方图分段，类似<a href="http://www.ruanyifeng.com/blog/2013/03/similar_image_search_part_ii.html" target="_blank" rel="noopener">峰哥的方法</a>。对每个颜色通道分为4个区间，通过对4x4x4个区间像素点数量的统计，最后得到一幅图的64维的特征向量。</p>
+<p>一种更好的方法是把每个像素点的三维向量规约到一维上来，通常就是将RGB转化为对应的灰度，常用方法有三种：</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Relative_luminance" target="_blank" rel="noopener">Relative luminance</a>：<code>0.2126*R + 0.7152*G + 0.0722*B</code></li>
+<li><a href="http://www.w3.org/TR/AERT#color-contrast" target="_blank" rel="noopener">Luminance (perceived option 1)</a> ：<code>(0.299*R + 0.587*G + 0.114*B)</code></li>
+<li><a href="http://alienryderflex.com/hsp.html" target="_blank" rel="noopener">Luminance (perceived option 2, slower to calculate)</a>：<code>sqrt( 0.299*R^2 + 0.587*G^2 + 0.114*B^2 )</code></li>
+</ul>
+<p>以第二种方法<code>Luminance (perceived option 1)</code>为例，每个像素点经过计算后会得到一个<code>[0,255]</code>的值，所以整幅图，我们就得到一个255维的向量，其中每个分量即为该分量上像素点的数量。</p>
+<h3 id="hsv量化">HSV量化</h3>
+<p>采用非均匀量化，常见的有两种量化等级：16X4X4和8X3X3，分别是指每个分量的划分区间数。 我们采用的8X3X3的方式，规则如下</p>
+<div>
+<span class="math display">\[h = \left\{\begin{matrix}
+0 &amp; if \ h \leq 20^{\circ} \ or\ h \geq 316^{\circ} \\
+1 &amp; if \ 20^{\circ} &lt; h \leq 40^{\circ}\\
+2 &amp; if \ 40^{\circ} &lt; h \leq 75^{\circ}\\
+3 &amp; if \ 75^{\circ} &lt; h \leq 155^{\circ}\\
+4 &amp; if \ 155^{\circ} &lt; h \leq 190^{\circ}\\
+5 &amp; if \ 190^{\circ} &lt; h \leq 270^{\circ}\\
+6 &amp; if \ 270^{\circ} &lt; h \leq 295^{\circ}\\
+7 &amp; if \ 296^{\circ} &lt; h \leq 315^{\circ}\\
+\end{matrix}\right.\\
+s = \left\{\begin{matrix}
+0 &amp;if \ 0\leq s \leq 0.2  \\
+1 &amp; if \ 0.2 &lt; s \leq 0.7 \\
+2 &amp; if \ 0.7 &lt;  s \leq 1
+\end{matrix}\right.\\
+v = \left\{\begin{matrix}
+0 &amp;if \ 0\leq v \leq 0.2  \\
+1 &amp; if \ 0.2 &lt; v \leq 0.7 \\
+2 &amp; if \ 0.7 &lt;  v \leq 1
+\end{matrix}\right.\\\]</span>
+</div>
+<p>至此，我们可以对这8X3X3个区间进行统计，统计每个区间的像素点个数，最后得到一个72维的特征向量。</p>
+<p>类似于RGB，我们可以把每个像素点规约到一个值，用<a href="https://books.google.com/books?id=0XrkAwAAQBAJ&amp;pg=PA68&amp;lpg=PA68&amp;dq=hsv%20%20%209H%20%2b%203S%20%2b%20V&amp;source=bl&amp;ots=2DqBgp86m4&amp;sig=e1yQRbDCcMMm2vMmNP6dKyXcL_k&amp;hl=zh-CN&amp;sa=X&amp;ei=foAPVeTWNcXvoATM64DYBA&amp;ved=0CCAQ6AEwAA#v=onepage&amp;q=hsv%20%20%209H%20%2b%203S%20%2b%20V&amp;f=false" target="_blank" rel="noopener">此文章</a>提到的方法：</p>
+<p><span class="math display">\[G = 9*H + 3*S + V\]</span></p>
+<p>把每个像素点归约到一个<code>[0,72]</code>区间的整数。 进一步地，通过统计每个区间的像素点数量，得到一幅图的一个72维特征向量。即为72HSV直方图</p>
+<h2 id="主体抓取">主体抓取</h2>
+<p>俗称“抠图”，对主体的识别十分关键，算法通常都是围绕边缘识别做文章。 ### <a href="http://en.wikipedia.org/wiki/Otsu%27s_method" target="_blank" rel="noopener">大津法（Otsu method）</a></p>
+<p>峰哥的一篇<a href="http://www.ruanyifeng.com/blog/2013/03/similar_image_search_part_ii.html" target="_blank" rel="noopener">博文</a>也提到了这种方法，主要原理是通过穷举来找到前景色和背景色的最佳阈值，从而提取前景物体 这个算法中有两点需要注意： - 阈值选取 - RGB：用前文提到的量化方式在<code>[0,255]</code>中遍历选最优 - HSV：也用前文的量化方法在<code>[0,72]</code>中遍历选最优</p>
+<ul>
+<li>为方便计算，取类间差异：<span class="math inline">\(w_{1}w_{2}(u_{1}-u_{2})^{2}\)</span> 的最大值。已被证明类间差异取最大值和类内差异取最小值是同样的阈值。</li>
+</ul>
+<p>已本次三张衣服的图片为例，用Otsu对其抠图后，效果分别如下 三张原图： <img src="http://blog-imonxia.qiniudn.com/3clothes.png"> 抠图后，左侧为RGB量化，右侧为HSV量化： <img src="http://blog-imonxia.qiniudn.com/otsu_clothes1.png"> <img src="http://blog-imonxia.qiniudn.com/otsu_clothes2.png"> <img src="http://blog-imonxia.qiniudn.com/otsu_clothes3.png"></p>
+<h2 id="边缘检测">边缘检测</h2>
+<p>所谓图像的边缘，即为图像灰度变化率最大的地方。图像灰度在表面法向变化的不连续造成了图像出现边缘轮廓。一般认为边缘提取是要保留图像的灰度变化剧烈的区域，这从数学上看，最直观的方法就是微分(对于数字图像来说就是差分)。</p>
+<p>梯度的数学表示如下：</p>
+<div>
+<span class="math display">\[G[f(x,y)] = \begin{bmatrix}
+\frac{\partial f}{\partial x}\\
+\frac{\partial f}{\partial y}
+\end{bmatrix} = [G_{x}, G_{y}]^{T} = [\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}]^{T}\]</span>
+</div>
+<p>实际计算中，为降低计算量，常用以下两种方式来求梯度向量的模：</p>
+<div>
+<span class="math display">\[|G[f(x,y)]| = \sqrt{G_{x}^{2} + G_{y}^{2}} \approx |G_{x}| + |G_{y}|\\|G[f(x,y)]| = \sqrt{G_{x}^{2} + G_{y}^{2}} \approx max(|G_{x}|,|G_{y}|)\]</span>
+</div>
+<p>对于数字图像，梯度用差分表达为：</p>
+<p><span class="math display">\[|G[f(x,y)]| = \sqrt{[f(x,y) - f(x+1,y)]^{2} + [f(x,y) - f(x,y+1)]^{2}}\]</span></p>
+<p>我们选取了一种被广泛使用的算法——Roberts 梯度：</p>
+<p><span class="math display">\[|G[f(x,y)]| = \sqrt{[f(x,y) - f(x+1,y+1)]^{2} + [f(x+1,y) - f(x,y+1)]^{2}}\]</span></p>
+<p>对于给定鞋的目标图片，用Roberts 梯度得到的边缘检测效果如下： <img src="http://blog-imonxia.qiniudn.com/shoe.png"></p>
+<p>更多关于边缘检测的内容，可以参考：<a href="http://pst.nst.pku.edu.cn/teaching/nuclear_medicine/DIPnotes/chapter4/chapter4_3.pdf" target="_blank" rel="noopener">图像锐化</a></p>
+<h2 id="分割获取局部特征">分割获取局部特征</h2>
+<p>图像上不同区域对整幅图特征的贡献是不同的，滤掉无关紧要的背景以突出主体显然十分必要，所以就有了<a href="http://zh.wikipedia.org/wiki/%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2" target="_blank" rel="noopener">图像分割</a>。</p>
+<p>利用前面提到的边缘检测，我们可以获得图像的主体部分，对这个主体部分可以进一步提取特征，并且给予它更高的权值，这样可以很好地优化搜索效果。</p>
+<h1 id="相似性比较">相似性比较</h1>
+<h2 id="余弦相似性">余弦相似性</h2>
+<p>即计算两个向量的余弦夹角，夹角越小则相似度越高，更多内容见<a href="http://zh.wikipedia.org/wiki/%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E6%80%A7" target="_blank" rel="noopener">wiki</a></p>
+<h2 id="直方图相交法">直方图相交法</h2>
+<p>即计算两个直方图的重合度，规范定义如下： 设a,b是两个含有n个bin的直方图，他们的分量分别为<code>a(i)</code>和<code>b(i)</code>，则他们的直方相交距离为：</p>
+<p><span class="math display">\[D(a,b) = \sum_{i=1}^{n} min(a(i),b(i))\]</span></p>
+<p>为简化计算可做如下转换</p>
+<div>
+<span class="math display">\[K_{\cap }(a,b) = \frac{1}{2}\sum_{i = 1}^{n}(a_{i}+b_{i} - \left | a_{i}-b_{i} \right |)\]</span>
+</div>
+<p>再进一步地归一化到[0,1]</p>
+<h2 id="欧氏距离">欧氏距离</h2>
+<p>即计算两个向量在欧氏空间中的距离，其值为各对应维度的差的平方和再开方，详见<a href="http://zh.wikipedia.org/wiki/%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E5%BA%A6%E9%87%8F" target="_blank" rel="noopener">wiki</a></p>
+<h2 id="加权欧氏距离">加权欧氏距离</h2>
+<p>欧氏距离的升级版：</p>
+<div>
+<span class="math display">\[\sqrt{\sum_{i=1}^{n}w_{i}( x_{i} - y_{i} )^{2}}\]</span>
+</div>
+<h1 id="具体实现">具体实现</h1>
+<h2 id="详细步骤">详细步骤</h2>
+<p>特征提取步骤如下：</p>
+<ol type="1">
+<li>将15万张图片的尺寸统一，比如统一成<code>512*512</code></li>
+<li>利用Otsu抠图，得到图像主体和少量噪声背景</li>
+<li>以RGB或HSV方式，获取整幅图的特征向量</li>
+<li>对第2步得到的图进行边缘检测，进一步抓出图像主体部分</li>
+<li>对第4步得到的主体，用RGB或HSV方式，获取主体的特征向量</li>
+<li>对15万张图重复2~5步</li>
+</ol>
+<p>至此，得到了15万张图片的指纹信息，即两个特征向量。再以hash类型的形式存入redis。</p>
+<p>进入搜索阶段：</p>
+<ol type="1">
+<li>重复上述1~5的方法，计算出目标图片的两个指纹</li>
+<li>从数据库中读出一张图片，将该图的两个指纹分别与目标图片的两个指纹求相似度（尝试上文提到的各种方法，对比效果），于是得到两个评分，分别代表整体和主体。</li>
+<li>将两个评分加权，得到总分。</li>
+<li>对数据库中所有图片重复2,3步，记录所有总分</li>
+<li>对所有的总分倒排，取出需要的前N张。</li>
+</ol>
+<h2 id="搜索效果">搜索效果</h2>
+<p>经过对上述各种方法的尝试和参数调节，最终采用如下实现效果最优： - 用hsv方式求阈值，从而进行Otsu抠图，得到整幅图的72维特征向量 - 边缘检测抓出的主体，仍采用hsv方式量化，得到主体的72维特征向量 - 相似度比较时，采用直方相交和余弦夹角综合的方式，把两者都归一化到<code>[0,1]</code>再相乘 - 对两个评分加权时，中心部分权值取<code>6~8</code>效果最佳</p>
+<p>以衣服的目标图片1为例，前100搜索结果截图如下： <img src="http://blog-imonxia.qiniudn.com/result_clothes1.png"></p>
+<p>附</p>
+<ul>
+<li>图片集下载地址：<a href="http://pan.baidu.com/share/link?shareid=3724932786&amp;uk=2404571876&amp;third=15" target="_blank" rel="noopener">百度网盘</a></li>
+<li>本文源码：<a href="https://github.com/simon-xia/image_search" target="_blank" rel="noopener">github</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/图像搜索/" rel="tag"># 图像搜索</a>
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/抢购demo/" rel="next" title="一个小型抢购系统demo——饿了么大学生黑客马拉松小结">
+                <i class="fa fa-chevron-left"></i> 一个小型抢购系统demo——饿了么大学生黑客马拉松小结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/be-careful-with-golang-embedded-error/" rel="prev" title="Be Careful with Embedded Error in Golang">
+                Be Careful with Embedded Error in Golang <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#特征提取"><span class="nav-number">2.</span> <span class="nav-text">特征提取</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#颜色特征"><span class="nav-number">3.</span> <span class="nav-text">颜色特征</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#色彩模型"><span class="nav-number">3.1.</span> <span class="nav-text">色彩模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rgb颜色模型"><span class="nav-number">3.1.1.</span> <span class="nav-text">RGB颜色模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hsv颜色模型"><span class="nav-number">3.1.2.</span> <span class="nav-text">HSV颜色模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#颜色矩"><span class="nav-number">3.1.3.</span> <span class="nav-text">颜色矩</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#色彩量化"><span class="nav-number">3.2.</span> <span class="nav-text">色彩量化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rgb量化"><span class="nav-number">3.2.1.</span> <span class="nav-text">RGB量化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hsv量化"><span class="nav-number">3.2.2.</span> <span class="nav-text">HSV量化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主体抓取"><span class="nav-number">3.3.</span> <span class="nav-text">主体抓取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#边缘检测"><span class="nav-number">3.4.</span> <span class="nav-text">边缘检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分割获取局部特征"><span class="nav-number">3.5.</span> <span class="nav-text">分割获取局部特征</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相似性比较"><span class="nav-number">4.</span> <span class="nav-text">相似性比较</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#余弦相似性"><span class="nav-number">4.1.</span> <span class="nav-text">余弦相似性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#直方图相交法"><span class="nav-number">4.2.</span> <span class="nav-text">直方图相交法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#欧氏距离"><span class="nav-number">4.3.</span> <span class="nav-text">欧氏距离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加权欧氏距离"><span class="nav-number">4.4.</span> <span class="nav-text">加权欧氏距离</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#具体实现"><span class="nav-number">5.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#详细步骤"><span class="nav-number">5.1.</span> <span class="nav-text">详细步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搜索效果"><span class="nav-number">5.2.</span> <span class="nav-text">搜索效果</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "浅尝图像搜索/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

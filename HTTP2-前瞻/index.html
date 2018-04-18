@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="http2,network," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这两天和液漏酱同学一起翻译Daniel Stenberg的http2 explained ，发现http2有很多让人期待的特性，本文在此做一个简单介绍。 前天正好是Daniel代表作curl的17岁生日，在此祝这位HTTP协议界的前辈生日快乐！ XD 二进制 http2将全面启用二进制，主要有以下两大优势：">
+<meta name="keywords" content="http2,network">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP2 前瞻">
+<meta property="og:url" content="http://simonxia.com/HTTP2-前瞻/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="这两天和液漏酱同学一起翻译Daniel Stenberg的http2 explained ，发现http2有很多让人期待的特性，本文在此做一个简单介绍。 前天正好是Daniel代表作curl的17岁生日，在此祝这位HTTP协议界的前辈生日快乐！ XD 二进制 http2将全面启用二进制，主要有以下两大优势：">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/http2_obj.png">
+<meta property="og:image" content="http://blog-imonxia.qiniudn.com/http2_push.png">
+<meta property="og:updated_time" content="2018-02-01T02:10:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP2 前瞻">
+<meta name="twitter:description" content="这两天和液漏酱同学一起翻译Daniel Stenberg的http2 explained ，发现http2有很多让人期待的特性，本文在此做一个简单介绍。 前天正好是Daniel代表作curl的17岁生日，在此祝这位HTTP协议界的前辈生日快乐！ XD 二进制 http2将全面启用二进制，主要有以下两大优势：">
+<meta name="twitter:image" content="http://blog-imonxia.qiniudn.com/http2_obj.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/HTTP2-前瞻/"/>
+
+
+
+
+
+  <title>HTTP2 前瞻 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/HTTP2-前瞻/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">HTTP2 前瞻</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-03-22T15:30:26+08:00">
+                2015-03-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/network/" itemprop="url" rel="index">
+                    <span itemprop="name">network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/HTTP2-前瞻/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="HTTP2-前瞻/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这两天和<a href="http://www.zhihu.com/people/ye-lou-jiang" target="_blank" rel="noopener">液漏酱</a>同学一起翻译<a href="http://daniel.haxx.se/" target="_blank" rel="noopener">Daniel Stenberg</a>的<a href="http://daniel.haxx.se/http2/" target="_blank" rel="noopener">http2 explained</a> ，发现http2有很多让人期待的特性，本文在此做一个简单介绍。</p>
+<p>前天正好是Daniel代表作curl的<a href="http://daniel.haxx.se/blog/2015/03/20/curl-17-years-old-today/" target="_blank" rel="noopener">17岁生日</a>，在此祝这位HTTP协议界的前辈生日快乐！ XD</p>
+<h1 id="二进制">二进制</h1>
+<p>http2将全面启用二进制，主要有以下两大优势：</p>
+<a id="more"></a>
+<ul>
+<li><p>解析和成帧更方便</p>
+<p>文本协议中的空白符和其他冗余字符会使得协议的解析变得复杂，尤其是在识别一个帧的起始和结束字段时。另一方面，用二进制表示后，从中分离出某个特定的字段也变得非常方便。不过给各位同学带来的麻烦是，以后要查看http报文，必须得借助wireshark之类的工具才行了。</p></li>
+<li><p>体积减小</p>
+<p>采用二进制后，http将变得更紧凑，每个报文的体积更小，在大规模web应用随处可见的今天，无疑可以更好地节省网络资源。</p></li>
+</ul>
+<h1 id="多路复用">多路复用</h1>
+<p>这是http2较为显著的一个改进，主要是为了提高每个TCP连接的利用率。</p>
+<p>眼下的网页都越来越复杂，包含的对象数量只增不减，对象的大小也是逐渐增大。<a href="http://daniel.haxx.se/http2/" target="_blank" rel="noopener">http2 explained</a>中对一些流行网站的统计显示，他们的平均资源数量均超过100，大小累计超过1.9M。如图：</p>
+<p><img src="http://blog-imonxia.qiniudn.com/http2_obj.png"></p>
+<p>对每个对象都需要一个独立的http请求，为此从客户端和主机之间需要建立多个tcp连接来获得更好的上网体验，这样一来服务器端的压力就大大增加。而http2的愿景是，从客户端到每个主机只需要一条tcp连接，通过把它维持得更长久来满足需求。同时，在这个连接上，通过“流”的多路复用来提高利用率。</p>
+<p>其实早在http1.1中，pipeline就被提出来，用以解决批量提交http请求的问题，但由于这样或那样的原因，一直没有得到很好的普及和实现。</p>
+<p>这里所谓的“流”实际上是一个逻辑上的结合，是一个独立的，双向的帧序列，通过它，两个端点间实现通信。许多个流交织在一起，跑在一个tcp连接上，在目的地再被区分开来。</p>
+<h1 id="流的优先级">流的优先级</h1>
+<p>有了流的多路复用，就会有优先级。设置优先级的主要目的是从多个流中区分出重要程度，同时优先级里还有依赖参数，用以指定流的依赖关系。</p>
+<p>http2 流的优先级能够动态改变，浏览器可以指定哪些元素具有更高的优先级，如此可以优先把最重要的部分呈现给用户。</p>
+<h1 id="服务端推送">服务端推送</h1>
+<p>这个功能非常强大，举例说来就是，客户端在请求资源A时，服务器再回送资源A的同时也猜测到客户端可能需要资源B甚至C和D，所以，服务器直接将BCD推送给客户端，当然这是在一个新的流上完成。</p>
+<p>上面提到的BCD通常来说是一些图片或者js脚本，主要是由于他们对相应页面的依赖较大。如此，可有效地减少在客户端和服务器端的往返时延。</p>
+<p>来一张图对比下：</p>
+<p><img src="http://blog-imonxia.qiniudn.com/http2_push.png"></p>
+<h1 id="流重置">流重置</h1>
+<p>http2提供了后悔药，当我们希望能立即停止当前消息的发送再重新发一个新的时候，通过http2 的RST_STREAM帧即可实现，而http1.1中唯一的办法就是切断整个tcp连接。这样一来，既防止了带宽浪费，也复用了已有连接，避免了再次建立的开销。</p>
+<p>同时，对上一小结提到的服务端推送场景，如果客户端发现服务器推送的资源不是自己所需的，那么它可以立即发送一个RST_STREAM来终止服务器推送。</p>
+<h1 id="头部压缩">头部压缩</h1>
+<p>http本身是无状态协议，所以才有了cookie的诞生。这带来的另外一个问题是，http头部增大，而当请求同一个网站的资源时，这些臃肿的头部看起来几乎是一样的，这就给压缩提供了充足的理由。http2小组正在尝试设计合适的头部压缩格式——<a href="http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-12" target="_blank" rel="noopener">HPACK</a></p>
+<h1 id="小结">小结</h1>
+<p>http2主要是从google的<a href="http://en.wikipedia.org/wiki/SPDY" target="_blank" rel="noopener">SPDY</a>发展而来，仍然背负了许多包括http1在内的历史包袱，主要也是从向下兼容的角度考虑，保证数据能在http1和http2之间无碍地转发。</p>
+<p>虽然目前一些知名的浏览器厂商如Chrome和Firefox已经逐渐开始实现和支持http2，但要实现http1到http2 的升级还有很长的路要走，让我们对http2 将带来的全新体验拭目以待。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/http2/" rel="tag"># http2</a>
+          
+            <a href="/tags/network/" rel="tag"># network</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/那些先贤们的奇技淫巧/" rel="next" title="那些先贤们的奇技淫巧">
+                <i class="fa fa-chevron-left"></i> 那些先贤们的奇技淫巧
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/抢购demo/" rel="prev" title="一个小型抢购系统demo——饿了么大学生黑客马拉松小结">
+                一个小型抢购系统demo——饿了么大学生黑客马拉松小结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#二进制"><span class="nav-number">1.</span> <span class="nav-text">二进制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多路复用"><span class="nav-number">2.</span> <span class="nav-text">多路复用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流的优先级"><span class="nav-number">3.</span> <span class="nav-text">流的优先级</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#服务端推送"><span class="nav-number">4.</span> <span class="nav-text">服务端推送</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流重置"><span class="nav-number">5.</span> <span class="nav-text">流重置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#头部压缩"><span class="nav-number">6.</span> <span class="nav-text">头部压缩</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">7.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "HTTP2-前瞻/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

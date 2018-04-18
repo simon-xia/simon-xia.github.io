@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="c,exception," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="常见方式 一般来说，错误处理有两种方式  终止：错误太蛋疼，难以挽回，终止程序执行 恢复：小错误，给程序一次改过自新的机会，回滚到出错前某个位置，再次执行  C中的终止：  两个标准库函数：abort()和exit() 一个宏： void assert(int expression);　它的实现实际上最后也是调用abort()  对于错误处理，C的风格是通过error code实现，其头文件err">
+<meta name="keywords" content="c,exception">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析 C 的异常和错误处理">
+<meta property="og:url" content="http://simonxia.com/c-exception/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="常见方式 一般来说，错误处理有两种方式  终止：错误太蛋疼，难以挽回，终止程序执行 恢复：小错误，给程序一次改过自新的机会，回滚到出错前某个位置，再次执行  C中的终止：  两个标准库函数：abort()和exit() 一个宏： void assert(int expression);　它的实现实际上最后也是调用abort()  对于错误处理，C的风格是通过error code实现，其头文件err">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/c_exception1.png">
+<meta property="og:updated_time" content="2018-02-01T13:17:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅析 C 的异常和错误处理">
+<meta name="twitter:description" content="常见方式 一般来说，错误处理有两种方式  终止：错误太蛋疼，难以挽回，终止程序执行 恢复：小错误，给程序一次改过自新的机会，回滚到出错前某个位置，再次执行  C中的终止：  两个标准库函数：abort()和exit() 一个宏： void assert(int expression);　它的实现实际上最后也是调用abort()  对于错误处理，C的风格是通过error code实现，其头文件err">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/c_exception1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/c-exception/"/>
+
+
+
+
+
+  <title>浅析 C 的异常和错误处理 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/c-exception/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">浅析 C 的异常和错误处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-12-19T15:22:26+08:00">
+                2014-12-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/c-exception/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="c-exception/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="常见方式">常见方式</h1>
+<p>一般来说，错误处理有两种方式</p>
+<ul>
+<li>终止：错误太蛋疼，难以挽回，终止程序执行</li>
+<li>恢复：小错误，给程序一次改过自新的机会，回滚到出错前某个位置，再次执行</li>
+</ul>
+<p>C中的终止：</p>
+<ul>
+<li>两个标准库函数：<code>abort()</code>和<code>exit()</code></li>
+<li>一个宏： <code>void assert(int expression);</code>　它的实现实际上最后也是调用abort()</li>
+</ul>
+<p>对于错误处理，C的风格是通过error code实现，其头文件errno.h已定义了不少errno。在配合<code>perror()</code>使用下，可以得到更多详细信息。标准库果断采用了这种方式，简明优雅。</p>
+<a id="more"></a>
+<p>更进一步地，可以用包裹函数配合errno对所用函数进行进一步的封装，<a href="http://book.douban.com/subject/1500149/" target="_blank" rel="noopener">UNP</a>中就广泛地使用了这种风格。这样的处理的弊端是带来了进一步的函数调用开销，同时这样的封装扩展性也不是很好，会收到业务逻辑的影响。</p>
+<p>由于errno变量的全局性，使得它的实现并不总是线程安全的。同时虽然在ANSI C中有定义一些基本的errno，并且操作系统也会扩展一部分，但是依然无法改变其对错误描述的匮乏.</p>
+<p>当然也可以借助信号，使用signal()设置信号，调用raise引发信号，并进入相应的异常处理过程</p>
+<p>关于处理风格的问题，陈皓曾经也有<a href="http://coolshell.cn/articles/551.html" target="_blank" rel="noopener">文章</a>探讨过，我更喜欢第二种，表意简洁，易读性也好，虽然用了goto。其实个人感觉goto也没什么不好，一味地教条不用goto和乱用goto的本质是一样的，在文中这个场景，goto就恰到好处。</p>
+<p>该文的<a href="http://coolshell.cn/articles/551.html#comment-49" target="_blank" rel="noopener">评论区</a>出现了一个很优雅的方式，利用&amp;&amp;短路，搬运过来</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ( do_something() &amp;&amp; init_stuff() &amp;&amp; prepare_stuff() ) &#123;</span><br><span class="line">    <span class="keyword">return</span> do_the_ting();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">/* return error. make sure you have cleaned up the enviroment e.g. free the memory you have allocated */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="用setjmp和longjmp为c打造异常处理">用setjmp和longjmp为C打造异常处理</h1>
+<p>首先是关于jmp_buf，它的实际定义是一个数组，用于存储当前的上下文，如EIP等。有一种实现方式如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">jmp_buf</span> &#123;</span> <span class="keyword">int</span> _jb[_JBLEN + <span class="number">1</span>]; &#125; jmp_buf[<span class="number">1</span>];</span><br></pre></td></tr></table></figure>
+<p>云风还曾在<a href="http://blog.codingnow.com/2005/12/typedef_struct_array.html" target="_blank" rel="noopener">一篇文章</a>中称赞这个定义的精妙：传递时会直接被当作指针引用，避免了拷贝的开销。</p>
+<p>而setjmp和longjmp一般通过汇编实现，<a href="http://book.douban.com/subject/1767969/" target="_blank" rel="noopener">C: A Reference Manual (5th Edition)</a>还煞有介事地说：</p>
+<blockquote>
+<p>The only reliable way to implement setjmp and longjmp requires functions written in assembly language. You need an intimate knowledge of how the translator generates code. You also need to peiform several operations that you cannot express safely in C, if at all.</p>
+</blockquote>
+<p>可以参考<a href="http://www.embecosm.com/appnotes/ean9/html/ch04s01s02.html" target="_blank" rel="noopener">Implementing the setjmp and longjmp functions.</a></p>
+<p>这两者为c程序提供了区别于传统调用栈的另一种执行流程，通常用在错误处理中。</p>
+<p>利用此点，我们可以对它们做一个浅层的封装，使c也引入其他高级语言的异常处理机制。同时，可以在静态存储区或堆上维护一个异常的调用链，使这种异常处理机制可以实现嵌套。</p>
+<p>因此我们可以这样定义调用帧和一个全局帧标识</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">except_frame_tag</span> &#123;</span></span><br><span class="line">	jmp_buf				jp_buf;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> _<span class="title">except_frame_tag</span>	*<span class="title">prev</span>;</span></span><br><span class="line">	<span class="keyword">int</span>					ret;</span><br><span class="line">	<span class="keyword">char</span>				*msg;</span><br><span class="line">&#125;Except_frame;</span><br><span class="line">Except_frame *cur_frame;</span><br></pre></td></tr></table></figure>
+<p>然后如下定义几个宏，模拟try-except机制</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TRY \</span></span><br><span class="line">	<span class="keyword">do</span> &#123; \</span><br><span class="line">		Except_frame *tmp_frame = (Except_frame*)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Except_frame)); \</span><br><span class="line">		assert(tmp_frame); \</span><br><span class="line">		tmp_frame-&gt;prev = cur_frame; \</span><br><span class="line">		cur_frame = tmp_frame; \</span><br><span class="line">		<span class="keyword">if</span> (!(cur_frame-&gt;ret = setjmp(tmp_frame-&gt;jp_buf))) &#123; \</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EXCEPT(e) \</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> ((e) == cur_frame-&gt;ret) &#123; \</span><br><span class="line">		<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"%s\n"</span>, cur_frame-&gt;msg);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ELSE \</span></span><br><span class="line">	&#125; <span class="keyword">else</span>  &#123; \</span><br><span class="line">		<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Unkown error!\n"</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> FINALLY \</span></span><br><span class="line">	&#125; &#123;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RISE(e, s) \</span></span><br><span class="line">	cur_frame-&gt;msg = (<span class="keyword">char</span>*)(s); \</span><br><span class="line">	longjmp(cur_frame-&gt;jp_buf, (e));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> END_TRY \</span></span><br><span class="line">		&#125; \</span><br><span class="line">		Except_frame *tmp = cur_frame; \</span><br><span class="line">		cur_frame = cur_frame-&gt;prev; \</span><br><span class="line">		<span class="built_in">free</span>(tmp); \</span><br><span class="line">	&#125;<span class="keyword">while</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>用TRY包含需要执行的部分，然后每个EXCEPT处理特定异常，ELSE处理未知的其他异常，FINALLY处理一些收尾工作，用END_TRY结束。</p>
+<p>测试代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	TRY</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"first try\n"</span>);</span><br><span class="line">		TRY</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"first inside try\n"</span>);</span><br><span class="line">			RISE(SUCK2, <span class="string">"hehe"</span>)</span><br><span class="line">		EXCEPT(SUCK1)</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"get a inside exception 1\n"</span>);</span><br><span class="line">		EXCEPT(SUCK2)</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"get a inside exception 2\n"</span>);</span><br><span class="line">		END_TRY</span><br><span class="line">		RISE(SUCK3, <span class="string">"wtf"</span>);</span><br><span class="line">	EXCEPT(SUCK1)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"get a exception 1\n"</span>);</span><br><span class="line">	EXCEPT(SUCK2)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"get a exception 2\n"</span>);</span><br><span class="line">	ELSE</span><br><span class="line"></span><br><span class="line">	FINALLY</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"here is finally\n"</span>);</span><br><span class="line">	END_TRY</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下</p>
+<p><img src="http://7s1t7r.com1.z0.glb.clouddn.com/c_exception1.png"></p>
+<p>至此，已基本实现了嵌套异常的捕获</p>
+<h1 id="小结">小结</h1>
+<p>虽然我在上面用宏折腾半了天，但功能还是很脆弱的。</p>
+<p>首先，异常的类型很单一，因为是通过setjmp的返回值来匹配异常，所以只对int型的有效。这点很容易改进，给两个参考：</p>
+<p>早在1989年，E.S.Roberts就有一篇类似的文章：<a href="http://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-40.pdf" target="_blank" rel="noopener">Implementing Exceptions in C</a> 另一个参考：<a href="http://www.di.unipi.it/~nids/docs/longjump_try_trow_catch.html" target="_blank" rel="noopener">Exceptions in C with Longjmp and Setjmp</a></p>
+<p>另一个问题就是硬伤了————没有gc的exception都是耍流氓</p>
+<p>冯东就曾在<a href="http://techsingular.net/?p=2153" target="_blank" rel="noopener">谈lua的异常</a>时指出，GC机制的缺乏导致C的异常处理如若无物，longjmp也只是单纯地下降栈顶，并不对抛弃的栈做任何处理，也不对已分配资源做回收。C++在此基础上有所改进，可以参看<a href="http://www.codeproject.com/Articles/2126/How-a-C-compiler-implements-exception-handling" target="_blank" rel="noopener">How a C++ compiler implements exception handling</a></p>
+<p>有一个比较可靠的实现是微软在win下的<a href="http://msdn.microsoft.com/en-us/library/vstudio/swezty51.aspx" target="_blank" rel="noopener">SEH (Structured Exception Handling)</a>，它的<a href="http://en.wikipedia.org/wiki/Microsoft-specific_exception_handling_mechanisms#Structured_Exception_Handling" target="_blank" rel="noopener">wiki</a></p>
+<p>总结起来就是，用合适的方法干合适的事，没有条件创造条件的结果都是强扭的瓜不甜。</p>
+<p>更进一步的话题就是关于异常机制的设计了，放一个轮子哥的<a href="http://www.cppblog.com/vczh/archive/2013/06/10/200920.html" target="_blank" rel="noopener">博文</a>作为结尾镇楼</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/c/" rel="tag"># c</a>
+          
+            <a href="/tags/exception/" rel="tag"># exception</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/cdecl/" rel="next" title="C语言声明解析的简单实现">
+                <i class="fa fa-chevron-left"></i> C语言声明解析的简单实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/为什么以太网帧的最小载荷是46字节/" rel="prev" title="为什么以太网帧的最小载荷是46字节">
+                为什么以太网帧的最小载荷是46字节 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#常见方式"><span class="nav-number">1.</span> <span class="nav-text">常见方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用setjmp和longjmp为c打造异常处理"><span class="nav-number">2.</span> <span class="nav-text">用setjmp和longjmp为C打造异常处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "c-exception/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

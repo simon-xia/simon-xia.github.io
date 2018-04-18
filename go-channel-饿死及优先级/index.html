@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,channel,优先级,sarama," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="sarama 引发的血案 最近发现线上的用 go client sarama 消费 kafka 出现部分 partition 明显延迟，如下图  查看其代码后，发现消费者的模式是对每个 partition 启动一个 partition consumer，然后一个更上层的 consumer 监听他们。简单概括可以是如下模式">
+<meta name="keywords" content="golang,channel,优先级,sarama">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go channel 的饿死和优先级处理">
+<meta property="og:url" content="http://simonxia.com/go-channel-饿死及优先级/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="sarama 引发的血案 最近发现线上的用 go client sarama 消费 kafka 出现部分 partition 明显延迟，如下图  查看其代码后，发现消费者的模式是对每个 partition 启动一个 partition consumer，然后一个更上层的 consumer 监听他们。简单概括可以是如下模式">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/go-channel-priority/kafka-lag.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-04-11T18:05:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="go channel 的饿死和优先级处理">
+<meta name="twitter:description" content="sarama 引发的血案 最近发现线上的用 go client sarama 消费 kafka 出现部分 partition 明显延迟，如下图  查看其代码后，发现消费者的模式是对每个 partition 启动一个 partition consumer，然后一个更上层的 consumer 监听他们。简单概括可以是如下模式">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/go-channel-priority/kafka-lag.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/go-channel-饿死及优先级/"/>
+
+
+
+
+
+  <title>go channel 的饿死和优先级处理 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/go-channel-饿死及优先级/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">go channel 的饿死和优先级处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-11T15:56:38+08:00">
+                2017-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/go-channel-饿死及优先级/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="go-channel-饿死及优先级/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="sarama-引发的血案">sarama 引发的血案</h1>
+<p>最近发现线上的用 go client <a href="https://github.com/Shopify/sarama" target="_blank" rel="noopener">sarama</a> 消费 kafka 出现部分 partition 明显延迟，如下图</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/go-channel-priority/kafka-lag.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>查看其代码后，发现消费者的模式是对每个 partition 启动一个 partition consumer，然后一个更上层的 consumer 监听他们。简单概括可以是如下模式</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> parition consumer1:</span><br><span class="line">    <span class="keyword">case</span> parition consumer2:</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">case</span> parition consumern:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h1 id="情景模拟测试">情景模拟测试</h1>
+<p>go 中的 <a href="https://golang.org/ref/spec#Select_statements" target="_blank" rel="noopener">select</a>，当多个case 触发时，使用的是一种伪随机的均匀选择。 specification 中这样描述</p>
+<blockquote>
+<p>If one or more of the communications can proceed, a single one that can proceed is chosen via <em>a uniform pseudo-random selection</em>.</p>
+</blockquote>
+<p>我们可以用一个小程序来模拟验证下上一节的猜想。</p>
+<div><div class="fold_hider"><div class="close hider_title">select_test.go 点击展开隐藏内容</div></div><div class="fold">
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"bytes"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"reflect"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	TestChanCnt  = <span class="number">10</span></span><br><span class="line">	TestChanSize = <span class="number">100</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	chans := []<span class="keyword">chan</span> <span class="keyword">int</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; TestChanCnt; i++ &#123;</span><br><span class="line">		c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, TestChanSize)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">			<span class="keyword">var</span> dur time.Duration = <span class="number">1</span> * time.Millisecond</span><br><span class="line">			<span class="comment">// 模拟写入慢的 channel</span></span><br><span class="line">			<span class="comment">// if i == 5 &#123;</span></span><br><span class="line">			<span class="comment">// 	dur = 2 * time.Millisecond</span></span><br><span class="line">			<span class="comment">// &#125;</span></span><br><span class="line">			<span class="keyword">for</span> j := <span class="number">0</span>; j &lt; TestChanSize; j++ &#123;</span><br><span class="line">				c &lt;- <span class="number">1</span></span><br><span class="line">				time.Sleep(dur)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;(i)</span><br><span class="line">		chans = <span class="built_in">append</span>(chans, c)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	cases := <span class="built_in">make</span>([]reflect.SelectCase, <span class="built_in">len</span>(chans))</span><br><span class="line">	<span class="keyword">for</span> i, ch := <span class="keyword">range</span> chans &#123;</span><br><span class="line">		cases[i] = reflect.SelectCase&#123;Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	result := <span class="built_in">make</span>([]<span class="keyword">int</span>, TestChanCnt*TestChanSize)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; TestChanCnt*TestChanSize; i++ &#123;</span><br><span class="line">		chosen, _, _ := reflect.Select(cases)</span><br><span class="line">		result[i] = chosen</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	buf := bytes.NewBufferString(<span class="string">"cnt\t"</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; TestChanCnt; i++ &#123;</span><br><span class="line">		buf.WriteString(fmt.Sprintf(<span class="string">"chan%d\t"</span>, i))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	step := TestChanSize * TestChanCnt / <span class="number">10</span></span><br><span class="line">	<span class="keyword">for</span> e := step; e &lt; <span class="built_in">len</span>(result); e += step &#123;</span><br><span class="line">		buf.WriteString(fmt.Sprintf(<span class="string">"\n%d\t"</span>, e))</span><br><span class="line">		<span class="keyword">for</span> _, f := <span class="keyword">range</span> stat(result[:e]) &#123;</span><br><span class="line">			buf.WriteString(fmt.Sprintf(<span class="string">"%.3f\t"</span>, f))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	buf.WriteString(fmt.Sprintf(<span class="string">"\n%d\t"</span>, <span class="built_in">len</span>(result)))</span><br><span class="line">	<span class="keyword">for</span> _, f := <span class="keyword">range</span> stat(result) &#123;</span><br><span class="line">		buf.WriteString(fmt.Sprintf(<span class="string">"%.3f\t"</span>, f))</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(buf.String())</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">stat</span><span class="params">(a []<span class="keyword">int</span>)</span> <span class="params">(result []<span class="keyword">float64</span>)</span></span> &#123;</span><br><span class="line">	cnt := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>, TestChanCnt)</span><br><span class="line">	total := <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> _, aa := <span class="keyword">range</span> a &#123;</span><br><span class="line">		cnt[aa]++</span><br><span class="line">		total++</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; TestChanCnt; i++ &#123;</span><br><span class="line">		result = <span class="built_in">append</span>(result, <span class="keyword">float64</span>(cnt[i])/<span class="keyword">float64</span>(total))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<p>一次运行结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cnt	   chan0	chan1	chan2	chan3	chan4	chan5	chan6	chan7	chan8	chan9</span><br><span class="line">100	   0.110	0.110	0.100	0.090	0.150	0.090	0.110	0.110	0.070	0.060</span><br><span class="line">200	   0.115	0.105	0.115	0.090	0.130	0.075	0.100	0.100	0.080	0.090</span><br><span class="line">300	   0.100	0.100	0.107	0.083	0.123	0.100	0.107	0.107	0.077	0.097</span><br><span class="line">400	   0.113	0.092	0.102	0.095	0.115	0.095	0.098	0.100	0.092	0.098</span><br><span class="line">500	   0.108	0.098	0.110	0.108	0.108	0.088	0.094	0.096	0.088	0.102</span><br><span class="line">600	   0.112	0.100	0.103	0.115	0.100	0.088	0.098	0.088	0.092	0.103</span><br><span class="line">700	   0.110	0.100	0.099	0.110	0.099	0.094	0.091	0.093	0.099	0.106</span><br><span class="line">800	   0.102	0.100	0.102	0.107	0.106	0.087	0.087	0.096	0.104	0.106</span><br><span class="line">900	   0.101	0.097	0.103	0.109	0.107	0.088	0.094	0.098	0.094	0.109</span><br><span class="line">1000   0.100	0.100	0.100	0.100	0.100	0.100	0.100	0.100	0.100	0.100</span><br></pre></td></tr></table></figure>
+<p>可见在资源充足（channel中有数据可消费）时，基本上 select 的选择是公平的。 但是，当有的 channel 中数据写入过慢时，即在某些时间点上，被写入过慢的 channel 里没有数据供消费，这时被 select 选中的机会自然就让给其他有数据的 channel。 时间一长，在消费端自然就会出现从不同 channel 消费数据倾斜的问题，反应到上面的表格中，就是写入慢的channel 占比明显小于其他 channel。 我们将上面代码中的注释去掉，重新运行得到结果如下，可见 channel5 在前 9 次采样中占比明显降低</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cnt	   chan0	chan1	chan2	chan3	chan4	chan5	chan6	chan7	chan8	chan9</span><br><span class="line">100	   0.100	0.100	0.110	0.110	0.110	0.060	0.100	0.100	0.110	0.100</span><br><span class="line">200	   0.105	0.105	0.105	0.105	0.105	0.055	0.105	0.105	0.105	0.105</span><br><span class="line">300	   0.107	0.107	0.107	0.103	0.103	0.057	0.103	0.107	0.103	0.103</span><br><span class="line">400	   0.105	0.105	0.105	0.105	0.105	0.058	0.102	0.105	0.105	0.105</span><br><span class="line">500	   0.106	0.106	0.106	0.104	0.104	0.058	0.104	0.104	0.104	0.104</span><br><span class="line">600	   0.105	0.105	0.105	0.105	0.105	0.057	0.105	0.105	0.103	0.105</span><br><span class="line">700	   0.106	0.106	0.106	0.104	0.104	0.057	0.104	0.104	0.104	0.104</span><br><span class="line">800	   0.105	0.104	0.105	0.105	0.105	0.056	0.105	0.105	0.105	0.105</span><br><span class="line">900	   0.104	0.106	0.104	0.104	0.104	0.057	0.106	0.104	0.104	0.106</span><br><span class="line">1000   0.100	0.100	0.100	0.100	0.100	0.100	0.100	0.100	0.100	0.100</span><br></pre></td></tr></table></figure>
+<p>这在一些业务场景里是不能接受的，比如本文开头提到的消费 kafka 出现部分 partition 延迟过大</p>
+<h1 id="解决方案">解决方案</h1>
+<h2 id="轮询">轮询</h2>
+<p>一种简单的解决方案是轮询所有被监听的 channel，从每个 channel 中消费固定数量的数据。大致代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> minBatch = <span class="number">10</span></span><br><span class="line"><span class="keyword">for</span> _, c := <span class="keyword">range</span> chans &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; minBatch; i++ &#123;</span><br><span class="line">        v := &lt;-c</span><br><span class="line">        <span class="comment">// do something</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种策略每次轮询的耗时由所有 channel 中写入最慢 channel 决定。 它有一个明显的缺点，当有的 channel 在一段时间为空时，此策略会持续阻塞。 在吞吐量可接受的情况，没有空置 channel 的情景里，此方案简单易行。</p>
+<h2 id="带优先级的-channel">带优先级的 channel</h2>
+<p>另一种思路是给不同的 channel 引入不同的优先级，对生产慢的 channel 赋予高优先级。即一旦慢的 channel 中有数据，我们优先对其消费。</p>
+<h3 id="针对-select-的-work-around">针对 select 的 work around</h3>
+<p>go语言原生没有对 channel 的优先级支持，我们可以</p>
+<p>基于 select 随机选的特性，一个简单暴力的办法就是直接增加需要提高权重的 channel 的 case，还能根据优先级配比调整case数量。比如以下代码，abcd 优先级依次递减</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> x = &lt;-a:</span><br><span class="line"><span class="keyword">case</span> x = &lt;-a:</span><br><span class="line"><span class="keyword">case</span> x = &lt;-b:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样写比较丑，可以用 <code>reflect.Select()</code> 的channel数组优雅点。</p>
+<p>另一种暴力美学是多个 select 并置，重复上面的例子如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> x := &lt;-a:</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> x := &lt;-a:</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"><span class="keyword">case</span> x := &lt;-b:</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>利用 select 的 default 嵌套也行，但是太多会嵌套深，代码不可读。简单例子如下，a 优先级高于b</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> x := &lt;-a:</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">    <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> x := &lt;-b:</span><br><span class="line">	        <span class="keyword">return</span> x</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="带条件控制的-case-语句">带条件控制的 case 语句</h3>
+<p>另一种思路是在 case 语句前加入一些条件，通过控制条件来决定优先级，模式如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> condition1 &amp;&amp; x := &lt;-a:</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"><span class="keyword">case</span> condition2 &amp;&amp; x := &lt;-b:</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>控制两个 condition 实现优先级，比如 Russ Cox 这个<a href="https://groups.google.com/forum/#!msg/golang-nuts/ChPxr_h8kUM/mntIttBSZDUJ" target="_blank" rel="noopener">例子</a>，非常 tricky，值得玩味</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maybe</span><span class="params">(b <span class="keyword">bool</span>, c <span class="keyword">chan</span> <span class="keyword">int</span>)</span> <span class="title">chan</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> !b &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> c</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> &lt;-maybe(val&gt;<span class="number">0</span>, p):</span><br><span class="line">    val--</span><br><span class="line"><span class="keyword">case</span> &lt;-v:</span><br><span class="line">    val++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="http://www.teigfam.net/oyvind/home/technology/047-priority-select-in-go/" target="_blank" rel="noopener"></a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/channel/" rel="tag"># channel</a>
+          
+            <a href="/tags/优先级/" rel="tag"># 优先级</a>
+          
+            <a href="/tags/sarama/" rel="tag"># sarama</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/统计学习方法全部习题解答/" rel="next" title="统计学习方法全部习题解答">
+                <i class="fa fa-chevron-left"></i> 统计学习方法全部习题解答
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/" rel="prev" title="Flume KafkaSink Duplicate Data During Kafka's Controller Election With Error 'Cached zkVersion not equal'">
+                Flume KafkaSink Duplicate Data During Kafka's Controller Election With Error 'Cached zkVersion not equal' <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#sarama-引发的血案"><span class="nav-number">1.</span> <span class="nav-text">sarama 引发的血案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#情景模拟测试"><span class="nav-number">2.</span> <span class="nav-text">情景模拟测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决方案"><span class="nav-number">3.</span> <span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#轮询"><span class="nav-number">3.1.</span> <span class="nav-text">轮询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#带优先级的-channel"><span class="nav-number">3.2.</span> <span class="nav-text">带优先级的 channel</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#针对-select-的-work-around"><span class="nav-number">3.2.1.</span> <span class="nav-text">针对 select 的 work around</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#带条件控制的-case-语句"><span class="nav-number">3.2.2.</span> <span class="nav-text">带条件控制的 case 语句</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "go-channel-饿死及优先级/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

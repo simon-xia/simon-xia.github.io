@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kafka," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Controller 主要功能  内部状态维护  所有 broker 上的 replica 状态 所有 partition 的 leader 的状态  集群状态改变的输入源  监听 zk 上的节点，触发各种事件 维护到所有 controller 的指令通道  状态改变的控制中心  目前问题  状态转换是并发进行的，因为多个监听器是独立工作，这可能导致多个状态转化同时发生。 状态在传播时使用的是异">
+<meta name="keywords" content="kafka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka Controller 前瞻">
+<meta property="og:url" content="http://simonxia.com/kafka-controller-prospects/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="Controller 主要功能  内部状态维护  所有 broker 上的 replica 状态 所有 partition 的 leader 的状态  集群状态改变的输入源  监听 zk 上的节点，触发各种事件 维护到所有 controller 的指令通道  状态改变的控制中心  目前问题  状态转换是并发进行的，因为多个监听器是独立工作，这可能导致多个状态转化同时发生。 状态在传播时使用的是异">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/kafka-controller/arch.png">
+<meta property="og:updated_time" content="2018-03-14T12:58:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kafka Controller 前瞻">
+<meta name="twitter:description" content="Controller 主要功能  内部状态维护  所有 broker 上的 replica 状态 所有 partition 的 leader 的状态  集群状态改变的输入源  监听 zk 上的节点，触发各种事件 维护到所有 controller 的指令通道  状态改变的控制中心  目前问题  状态转换是并发进行的，因为多个监听器是独立工作，这可能导致多个状态转化同时发生。 状态在传播时使用的是异">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/kafka-controller/arch.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/kafka-controller-prospects/"/>
+
+
+
+
+
+  <title>Kafka Controller 前瞻 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/kafka-controller-prospects/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kafka Controller 前瞻</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-28T15:20:04+08:00">
+                2018-01-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/infra/" itemprop="url" rel="index">
+                    <span itemprop="name">infra</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/kafka-controller-prospects/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="kafka-controller-prospects/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="controller-主要功能">Controller 主要功能</h2>
+<ol type="1">
+<li>内部状态维护
+<ul>
+<li>所有 broker 上的 replica 状态</li>
+<li>所有 partition 的 leader 的状态</li>
+</ul></li>
+<li>集群状态改变的输入源
+<ul>
+<li>监听 zk 上的节点，触发各种事件</li>
+<li>维护到所有 controller 的指令通道</li>
+</ul></li>
+<li>状态改变的控制中心</li>
+</ol>
+<h2 id="目前问题">目前问题</h2>
+<ol type="1">
+<li>状态转换是并发进行的，因为多个监听器是独立工作，这可能导致多个状态转化同时发生。</li>
+<li>状态在传播时使用的是异步通信，可能导致不同 broker 在特定时间点状态不一致。比如我在<a href="http://simonxia.com/Flume-KafkaSink-Duplicate-Data-During-Kafka&#39;s-controller-election">这篇文章</a>中遇到的情况</li>
+<li>controller 到各个 broker 以及 controller 和 zk 之间的通信效率需要提升</li>
+<li>需要对一些执行时间长的操作（如 partition reassignmen）支持取消操作</li>
+</ol>
+<a id="more"></a>
+<h2 id="新版的一些具体改进">新版的一些具体改进</h2>
+<h3 id="事件及其处理">事件及其处理</h3>
+<p>新版 controller 里放弃以前每个 zk 事件监听器一个线程的模式，改为事件触发的单线程模式</p>
+<p>总体结构如下图：</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/kafka-controller/arch.png">
+<p>所有的 zk 状态变化都被抽象为 event，每个具体的状态变化事件都继承此抽象类。event 的定义如下</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">KafkaControllerEvent</span>(<span class="params">eventType: <span class="type">ControllerEventType</span></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// A set that tracks the responses from brokers</span></span><br><span class="line">  <span class="keyword">val</span> unAckedNode = <span class="keyword">new</span> mutable.<span class="type">HashSet</span>[<span class="type">Int</span>]</span><br><span class="line">  <span class="keyword">val</span> eventDone = <span class="keyword">new</span> <span class="type">CountDownLatch</span>(<span class="number">1</span>)</span><br><span class="line">   </span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">makeStatesChange</span></span>(currentState: <span class="type">PartitionStateMachine</span>): <span class="type">Map</span>[<span class="type">Int</span>, <span class="type">ClientRequest</span>]</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">controllerRequestCallback</span></span>(response: <span class="type">ClientResponse</span>) &#123;</span><br><span class="line">    handleBrokerResponse(response)</span><br><span class="line">    unAckedNode.remove(response.request().request().destination())</span><br><span class="line">    <span class="keyword">if</span> (unAckedNode.isEmpty)</span><br><span class="line">      eventDone.countDown()</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handleBrokerResponse</span></span>(response: <span class="type">ClientResponse</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中, <code>unAckedNode</code> 维护了所有未确认消息的 borker 集合，只有当该集合为空时，event 才被认为完成。由此保证了状态传播的同步。</p>
+<p>controller 中，一个 event 的处理流程大致如下</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(!shutdown)&#123;</span><br><span class="line">    <span class="type">Event</span> event = eventQueue.pollFirst()</span><br><span class="line">    <span class="comment">// Make state change</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">val</span> brokerRequests = event.makeStateChange(partitionStateMachine)</span><br><span class="line">        brokerRequests.map &#123; <span class="keyword">case</span> (broker, request) =&gt;</span><br><span class="line">            networkClient.send(request)</span><br><span class="line">            event.unAckedNode.add(broker)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!event.unAckedNode.isEmpty) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                networkClient.poll(timeout)</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="type">KafkaApiException</span> =&gt;</span><br><span class="line">                    <span class="comment">// Do something</span></span><br><span class="line">                <span class="keyword">case</span> <span class="type">Exception</span> =&gt;</span><br><span class="line">                    <span class="comment">// Error handling</span></span><br><span class="line">            &#125;</span><br><span class="line">            checkNodeLivenessAndIgnoreDeadNode()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">StateChangeException</span> =&gt;</span><br><span class="line">            <span class="comment">// handle illegal state change</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>概括就是，每次从队列里取一个，单线程同步依次处理。</p>
+<h3 id="改进-controller-消息">改进 controller 消息</h3>
+<p>目前 kafka 集群的控制消息和数据消息是通过一个队列传递的，并且拥有相同的优先级。这有可能造成 controller 下发的控制消息被其他消息阻塞，从而在一些状态切换中引入问题。 新版的 controller 里提高 controller 到 broker 消息的优先级，达到区分控制消息和数据消息的目的。可参考 <a href="https://issues.apache.org/jira/browse/KAFKA-4453" target="_blank" rel="noopener">KAFKA-4453</a>、<a href="https://issues.apache.org/jira/browse/KAFKA-2139" target="_blank" rel="noopener">KAFKA-2139</a></p>
+<h3 id="重构集群状态管理">重构集群状态管理</h3>
+<p>目前的副本状态和分区状态分别由 <code>ReplicaStateMachine</code> 和 <code>PartitionStateMachine</code> 两个状态机维护，而状态转化本身并不是相互独立的，controller 必须维护这两个状态机中的状态顺序</p>
+<h3 id="改进与-zk-的通信">改进与 zk 的通信</h3>
+<p>目前 controller 与 zk 是同步通信，并且很多消息如 <code>leaderAndIsr</code> 是以分区为粒度的消息，顺序地同步写非常低效。</p>
+<p>从 <a href="http://zookeeper-user.578899.n2.nabble.com/sync-vs-async-vs-multi-performances-td7284355.html" target="_blank" rel="noopener">sync vs. async vs. multi performances</a> 性能测评来看，性能上是 multi &gt; async &gt; sync 。社区的观点是[2]:</p>
+<blockquote>
+<p>除非真的有批处理事务需求，比起批量事务地更新，<em>一个接一个地异步请求把网络跑满</em>是更好的选择。同时，以单个请求为粒度做处理也使逻辑更简洁。</p>
+</blockquote>
+<p>基于此，新版的 controller 会全部替换为 async zk api</p>
+<h2 id="参考资料">参考资料</h2>
+<p>[1][KAFKA-5027](https://issues.apache.org/jira/browse/KAFKA-5027)</p>
+<p>[2][Google Doc: Kafka Controller Redesign](https://docs.google.com/document/d/1rLDmzDOGQQeSiMANP0rC2RYp_L7nUGHzFD9MQISgXYM)</p>
+<p>[3][wiki: Kafka Controller Redesign](https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Controller+Redesign)</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kafka/" rel="tag"># kafka</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/" rel="next" title="Flume KafkaSink Duplicate Data During Kafka's Controller Election With Error 'Cached zkVersion not equal'">
+                <i class="fa fa-chevron-left"></i> Flume KafkaSink Duplicate Data During Kafka's Controller Election With Error 'Cached zkVersion not equal'
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/compress-type-kafka/" rel="prev" title="Kafka 1.1 Compression Compare from Producer's View">
+                Kafka 1.1 Compression Compare from Producer's View <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#controller-主要功能"><span class="nav-number">1.</span> <span class="nav-text">Controller 主要功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目前问题"><span class="nav-number">2.</span> <span class="nav-text">目前问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新版的一些具体改进"><span class="nav-number">3.</span> <span class="nav-text">新版的一些具体改进</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件及其处理"><span class="nav-number">3.1.</span> <span class="nav-text">事件及其处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#改进-controller-消息"><span class="nav-number">3.2.</span> <span class="nav-text">改进 controller 消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重构集群状态管理"><span class="nav-number">3.3.</span> <span class="nav-text">重构集群状态管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#改进与-zk-的通信"><span class="nav-number">3.4.</span> <span class="nav-text">改进与 zk 的通信</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "kafka-controller-prospects/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

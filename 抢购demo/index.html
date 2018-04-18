@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,concurrent,黑客马拉松," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="题目内容 简单地说就是，实现给定的api并尽可能地提高并发量。 具体规则详见官网：饿了么全国大学生黑客马拉松 初步设计 redis 存储 按照业务逻辑拆分为4个库，各司其职，分别如下：    Db name Key type Key     accessTokenDb k-v accessToken   cartDb hash cartid   orderDb hash accessToken">
+<meta name="keywords" content="golang,concurrent,黑客马拉松">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个小型抢购系统demo——饿了么大学生黑客马拉松小结">
+<meta property="og:url" content="http://simonxia.com/抢购demo/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="题目内容 简单地说就是，实现给定的api并尽可能地提高并发量。 具体规则详见官网：饿了么全国大学生黑客马拉松 初步设计 redis 存储 按照业务逻辑拆分为4个库，各司其职，分别如下：    Db name Key type Key     accessTokenDb k-v accessToken   cartDb hash cartid   orderDb hash accessToken">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-getfoods.png">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-getorder.png">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-login.png">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-mkorder.png">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/log_analyze.png">
+<meta property="og:updated_time" content="2018-02-01T03:10:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一个小型抢购系统demo——饿了么大学生黑客马拉松小结">
+<meta name="twitter:description" content="题目内容 简单地说就是，实现给定的api并尽可能地提高并发量。 具体规则详见官网：饿了么全国大学生黑客马拉松 初步设计 redis 存储 按照业务逻辑拆分为4个库，各司其职，分别如下：    Db name Key type Key     accessTokenDb k-v accessToken   cartDb hash cartid   orderDb hash accessToken">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-getfoods.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/抢购demo/"/>
+
+
+
+
+
+  <title>一个小型抢购系统demo——饿了么大学生黑客马拉松小结 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/抢购demo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">一个小型抢购系统demo——饿了么大学生黑客马拉松小结</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-02T14:30:00+08:00">
+                2015-12-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/抢购demo/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="抢购demo/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="题目内容">题目内容</h1>
+<p>简单地说就是，实现给定的api并尽可能地提高并发量。</p>
+<p>具体规则详见官网：<a href="http://hackathon.ele.me/intro#intro-general" target="_blank" rel="noopener">饿了么全国大学生黑客马拉松</a></p>
+<h1 id="初步设计">初步设计</h1>
+<p>redis 存储 按照业务逻辑拆分为4个库，各司其职，分别如下：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Db name</th>
+<th>Key type</th>
+<th>Key</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>accessTokenDb</td>
+<td>k-v</td>
+<td>accessToken</td>
+</tr>
+<tr class="even">
+<td>cartDb</td>
+<td>hash</td>
+<td>cartid</td>
+</tr>
+<tr class="odd">
+<td>orderDb</td>
+<td>hash</td>
+<td>accessToken</td>
+</tr>
+<tr class="even">
+<td>hasorderedset</td>
+<td>set</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>登陆 accessTokenDb 创建和添加购物车 cartDb 下单 orderDb 判断下单唯一性 set</p>
+<a id="more"></a>
+<h1 id="逐步优化">逐步优化</h1>
+<h2 id="业务逻辑">业务逻辑</h2>
+<p>首当其冲的就是库存查询，因为涉及遍历foodDb，在所有流程中耗时最大。 后来仔细分析，其实完全是不必要的开销。因为最后的一致性是通过下单来保证的，没有库存下单直接判false。所以这里的查询返回给用户的具体数值也就没那么重要。最好的解决办法就是直接返回定值的库存，而非实时。最终可把这个接口的响应时间控制在 几十us左右，log如图：</p>
+<p><img src="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-getfoods.png"></p>
+<h2 id="io">io</h2>
+<p>和大多数web应用一样，io是性能的大瓶颈。 在添加购物车和下单流程中，除了核心功能，还涉及权限验证，是否超过购物车上限等判断。所以尽量减少对redis的请求次数，能合并的全合并，可以显著减少io开销。极限点的做法是，把每个逻辑都写成一个lua，业务逻辑全在redis端做。极限的坏处是，把本该属于本地的计算任务加在了数据库端。折衷的方案是把核心业务写在lua里，前期权限验证等在主机，这样非法的请求就不过redis。</p>
+<p>第一次写lua，踩坑太多，忍不住吐槽下：</p>
+<ul>
+<li>首先，一定要注意类型转换，redis和lua返回值之间的相互转换规则参见官方文档：<a href="http://redis.io/commands/eval#conversion-between-lua-and-redis-data-types" target="_blank" rel="noopener">Conversion between Lua and Redis data types</a></li>
+<li>再就是，debug redis中的lua，有几种参考如下，都挺折腾的 ＝。＝
+<ul>
+<li><a href="https://redislabs.com/blog/5-methods-for-tracing-and-debugging-redis-lua-scripts#.VlGHpWQrKAw" target="_blank" rel="noopener">5 methods for tracing and debugging redis lua scripts</a></li>
+<li><a href="http://www.trikoder.net/blog/make-lua-debugging-easier-in-redis-87/" target="_blank" rel="noopener">Make Lua debugging easier in Redis</a></li>
+</ul></li>
+<li>profiling，我也没找到好的办法，有个workaround 可以参考下：<a href="http://stackoverflow.com/a/16370699/2791115" target="_blank" rel="noopener">Can I profile Lua scripts running in Redis</a></li>
+</ul>
+<p>一个好消息，就在比赛进行的这段时间里，redis作者宣布会在今年12月发布的redis3.2里提供lua debugger.</p>
+<p>原文链接，还附有演示视频： <a href="http://antirez.com/news/97" target="_blank" rel="noopener">Recent improvements to Redis Lua scripting</a>。晚了一步，没赶上好时候 ＝＝||</p>
+<h2 id="异步">异步</h2>
+<p>在本系统中，可以异步的流程有</p>
+<ul>
+<li>创建购物车，返回用户cart_id，异步写redis</li>
+<li>下单，只要通过库存验证，立即返回200，异步保存订单</li>
+</ul>
+<h2 id="缓存">缓存</h2>
+<ul>
+<li>对食物的价格做本地缓存，在查询订单时计算订单总价。减少下单的计算和写redis开销</li>
+<li>本地存一部分订单，优化查询请求。换句话说就是，每台机器在完成下单后，保存这个订单。</li>
+</ul>
+<p>第二点其实可有可无，从概率上说，只有九分之一的订单会在同一台机器上下单并且查询。但最后时间紧迫，没有更多尝试机会，就索性这样了，用空间换时间，效果还是有的，log如图，两个GET差了上百us:</p>
+<p><img src="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-getorder.png"></p>
+<h2 id="连接池">连接池</h2>
+<ul>
+<li>关闭初次获取连接的心跳，节省一个RTT</li>
+<li>关闭超时机制，使连接总数等于最大活跃连接数</li>
+<li>压测时1000连接均衡到三台主机上，考虑一点冗余，每台设置连接池大小500</li>
+</ul>
+<h2 id="redis">redis</h2>
+<ul>
+<li><p>去掉set。sadd操作虽然一箭双雕，既能添加元素，也能在元素存在时返回0。但他的复杂度是O(n)。果断放弃，因为我用token作为order的key，所以直接使用 <code>exists accessToken</code> 判断key是否存在，虽然增加了一条命令，但换取了时间复杂度。</p></li>
+<li><p>用 hincrby 在下单时做库存的扣除，超卖则直接incr回去，而不是在判断完购物车中所有食物均有库存后，依次set。</p></li>
+</ul>
+<h3 id="pubsub">Pub/Sub</h3>
+<p>考虑到redis的publish 机制时，自己开了很多脑洞，有成功也有失败的，罗列一下：</p>
+<h3 id="本地登陆">本地登陆</h3>
+<p>登陆对实时性要求不高，尝试使用本地登陆，然后publish通知accessToken到三台主机上，节约每次登陆时走redis的时间。 此法被验证可行，但后来找到了更好的办法替代，具体就是，因为对token没有超时等限制，直接针对每个用户，使用固定规则生成统一的token，即可实现本地登陆。比如我的token生成方案<code>md5(username+password)</code>，login接口也可控制在几十us级 <img src="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-login.png"></p>
+<h3 id="本地创建购物车">本地创建购物车</h3>
+<p>创建购物车在本地进行，将cart_id和accessToken的映射关系通过publish同步到三台主机。 这样的好处是后续的添加购物车和下单流程中的前期权限验证等流程均可在本地实现，只有设计核心逻辑时走redis。 在实际验证中，虽然ci能过，但由于创建和添加购物车两个逻辑接踵而至，压测的流量上来了，三台主机经常来不及同步。另一方面，这样的同步广播使当时本来就相当拥塞的链路更加拥挤。放弃。</p>
+<h3 id="本地缓存库存">本地缓存库存</h3>
+<p>由于机器数量3台已知，库存总量1000已知。所以从理论上说，只要单台机器上没有商品被卖到333个以上是不可能出现超卖的。所以完全可以让前期下单判断库存是否足够放在本地，一旦有一个商品销量超过333，就使用publish通知到三台主机上，之后的下单逻辑按正常进行，老老实实走redis。</p>
+<p>具体操作是，用全局flag标记本地是否有商品售卖超过333，前期每次来订单，只要合法都成功下单，并在本地记录每个商品销量，一旦有大于333销量的商品出现，则：</p>
+<ol type="1">
+<li>publish 通知到三台机器上</li>
+<li>本机修改全局标记，同时将缓存的销量pipeline到redis里做扣除</li>
+<li>每台机器收到通知都进行步骤2</li>
+</ol>
+<p>实际测试时考虑到同步延迟、刷新延迟等问题，我把333缩小到了250，最后效果并不理想，也可能是我姿势不对。。。当时时间已经不多，每天只有一次的测试机会已经不允许我做再多的尝试，最后舍弃此方案。 放弃的主要原因是，订单本身是存在redis中，每次下单仍然需要从redis获取订单信息，进而进行库存查询和扣除，即一个RTT已经耗在上面了。而且下单逻辑全在一个lua里，也就多两三条redis指令，按照redis每秒几万条指令的执行速度计算，这个开销可以接受。log反馈也不错：</p>
+<p><img src="http://7s1t7r.com1.z0.glb.clouddn.com/eleme-mkorder.png"></p>
+<h2 id="吹毛求疵">吹毛求疵</h2>
+<ul>
+<li><p>随机生成字符串会占用一定时间开销，改为每个机器预生成一堆，节约每次生成cartid和orderid的时间，直接拿。后来实测，生成一共也就花费100+ms，平均到上万的请求上其实还是微不足道的 ＝。＝</p></li>
+<li><p>使用号称go web中最快的router：<a href="https://github.com/julienschmidt/httprouter" target="_blank" rel="noopener">httprouter</a>,要说横向对比，其实我也不知道，只是参考了一个作者本人自吹自擂的benchmark：<a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank" rel="noopener">go-http-routing-benchmark</a></p></li>
+</ul>
+<h2 id="其他辅助">其他辅助</h2>
+<p>log的统计特征分析，虽然后来逐渐发现，其实本地压测的数据意义不大，只能给个导向 = =</p>
+<p><img src="http://7s1t7r.com1.z0.glb.clouddn.com/log_analyze.png"></p>
+<h1 id="几点感想">几点感想</h1>
+<p>一个人折腾了两周终于告一段落。虽然比赛和实际项目有一定的差异，但在实操过程中依然收获不少，每天看榜，上下沉浮，也是因吹丝庭</p>
+<ul>
+<li>猜测-验证-改进。多次在这样的循环中摸索，很享受。</li>
+<li>Think twice, code once。</li>
+</ul>
+<p>好几次出现思考不成熟推理验证不充分，匆忙编码，噼里啪啦键盘一时爽。引以为戒。引用<a href="http://coolshell.cn/articles/5686.html" target="_blank" rel="noopener">耗子哥的一句话</a>作为结尾自勉</p>
+<blockquote>
+<p>聪明的程序员使用50%-70%的时间用来思考，尝试和权衡各种设计和实现，而用30% – 50%的时间是在忙碌着编码，调试和测试。</p>
+</blockquote>
+<p>明天公布成绩，祝大家好运 ^_^</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/concurrent/" rel="tag"># concurrent</a>
+          
+            <a href="/tags/黑客马拉松/" rel="tag"># 黑客马拉松</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/HTTP2-前瞻/" rel="next" title="HTTP2 前瞻">
+                <i class="fa fa-chevron-left"></i> HTTP2 前瞻
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/浅尝图像搜索/" rel="prev" title="浅尝图像搜索">
+                浅尝图像搜索 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#题目内容"><span class="nav-number">1.</span> <span class="nav-text">题目内容</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初步设计"><span class="nav-number">2.</span> <span class="nav-text">初步设计</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#逐步优化"><span class="nav-number">3.</span> <span class="nav-text">逐步优化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#业务逻辑"><span class="nav-number">3.1.</span> <span class="nav-text">业务逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#io"><span class="nav-number">3.2.</span> <span class="nav-text">io</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异步"><span class="nav-number">3.3.</span> <span class="nav-text">异步</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存"><span class="nav-number">3.4.</span> <span class="nav-text">缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接池"><span class="nav-number">3.5.</span> <span class="nav-text">连接池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis"><span class="nav-number">3.6.</span> <span class="nav-text">redis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pubsub"><span class="nav-number">3.6.1.</span> <span class="nav-text">Pub/Sub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#本地登陆"><span class="nav-number">3.6.2.</span> <span class="nav-text">本地登陆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#本地创建购物车"><span class="nav-number">3.6.3.</span> <span class="nav-text">本地创建购物车</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#本地缓存库存"><span class="nav-number">3.6.4.</span> <span class="nav-text">本地缓存库存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#吹毛求疵"><span class="nav-number">3.7.</span> <span class="nav-text">吹毛求疵</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他辅助"><span class="nav-number">3.8.</span> <span class="nav-text">其他辅助</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#几点感想"><span class="nav-number">4.</span> <span class="nav-text">几点感想</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "抢购demo/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kafka," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="The Full Story we first get realtime data increase alarm">
+<meta name="keywords" content="kafka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flume KafkaSink Duplicate Data During Kafka&#39;s Controller Election With Error &#39;Cached zkVersion not equal&#39;">
+<meta property="og:url" content="http://simonxia.com/Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="The Full Story we first get realtime data increase alarm">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-realtime.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-IsrExpandsPerSec.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-zk-ds.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-03-03T05:36:49.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flume KafkaSink Duplicate Data During Kafka&#39;s Controller Election With Error &#39;Cached zkVersion not equal&#39;">
+<meta name="twitter:description" content="The Full Story we first get realtime data increase alarm">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-realtime.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/"/>
+
+
+
+
+
+  <title>Flume KafkaSink Duplicate Data During Kafka's Controller Election With Error 'Cached zkVersion not equal' | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flume KafkaSink Duplicate Data During Kafka's Controller Election With Error 'Cached zkVersion not equal'</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T22:30:26+08:00">
+                2018-01-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/infra/" itemprop="url" rel="index">
+                    <span itemprop="name">infra</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="the-full-story">The Full Story</h1>
+<p>we first get realtime data increase alarm</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-realtime.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<a id="more"></a>
+<p>then we check the producer and consumer, only to find that some consumer was blocked, and some producer got the error</p>
+<pre><code>BrokerNotAvailableError: Could not find the leader</code></pre>
+<p>after check the kafka monitor, we find <code>MessagesInPerSec</code> of some broker fall apparently</p>
+{% qnimg posts/flume-kafka/ka-MessagesInPerSec-1.png %}
+<p>This means that although these brokers not die, they were not working properly, some writes of partition maybe fail</p>
+<p>At the same time, there was not partition leader failover according to partition monitor pane</p>
+{% qnimg posts/flume-kafka/ka-leaderCount.png %}
+<p>After check zk node <code>/controller_epoch</code>, we find its timestamp coincides with the alarm.</p>
+<p>And there are lots of duplicate log in <code>broker-18-server.log.2018-01-24-13</code></p>
+<pre><code>[2018-01-24 13:07:59,138] INFO Partition [fusion-rtlog-std-prod,21] on broker 18: Cached zkVersion [422946] not equal to that in zookeeper, skip updating ISR (kafka.cluster.Partition)   </code></pre>
+<p>at the same time, broker 18 <code>IsrExpandsPerSec</code> keep a high value</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-IsrExpandsPerSec.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<h1 id="dive-into-log-and-code">Dive Into Log And Code</h1>
+<p>The abnormal log in <code>broker-18-server.log.2018-01-24-13</code> is produced by function <code>updateISR</code></p>
+<pre><code>Cached zkVersion [%d] not equal to that in zookeeper, skip updating ISR</code></pre>
+<p>and the full call stack is</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">updateReplicaLogReadResult </span><br><span class="line">    maybeExpandISR</span><br><span class="line">        updateISR</span><br></pre></td></tr></table></figure>
+<p>function <code>updateReplicaLogReadResult</code> is called when the follower sync message from leader, which means it is called only in partition leader</p>
+<p>But we use <code>bin/kafka-topics.sh --describe</code>, the output tells leader of partition is not broker 18. It seems broker 18’s <code>metaCache</code> is not keep up with controller and zk</p>
+<p>After combing the log, we draw the timeline</p>
+<pre><code> 1. controller 18 expired
+ 2. broker 26 become controller
+ 3. broker 16 become controller </code></pre>
+<p>It seems cluster get stuck after step 3, broker 18 didn’t update leader info after controller 16 was elected.</p>
+<p>Choose one partition <code>fusion-rtlog-std-prod-230</code> to trace the issue</p>
+<p>after controller 16 start, it first hold the state</p>
+<p>broker-16-state-change.log.2018-01-24-13</p>
+<pre><code>[2018-01-24 13:07:59,671] TRACE Broker 16 cached leader info (LeaderAndIsrInfo:(Leader:18,ISR:18,15,23,LeaderEpoch:40,ControllerEpoch:254),ReplicationFactor:3),AllReplicas:15,18,23) for partition fusion-rtlog-std-prod-230 in response to UpdateMetadata request sent by controller 16 epoch 256 with correlation id 1 (state.change.logger)
+
+[2018-01-24 13:08:00,011] TRACE Controller 16 epoch 256 sending UpdateMetadata request (Leader:18,ISR:18,15,23,LeaderEpoch:40,ControllerEpoch:254) to broker 18 for partition fusion-rtlog-std-prod-230 (state.change.logger)</code></pre>
+<p>then Isr change, and controller broadcast the <code>UpdateMetadata</code> request broker-16-controller.log.2018-01-24-13</p>
+<pre><code>[2018-01-24 13:08:06,462] DEBUG [IsrChangeNotificationListener] Fired!!! (kafka.controller.IsrChangeNotificationListener)
+[2018-01-24 13:08:06,485] DEBUG Sending MetadataRequest to Brokers:ArrayBuffer(0, 5, 10, 24, 25, 20, 6, 28, 21, 2, 22, 12, 7, 3, 18, 16, 11, 26, 23, 8, 19, 4, 15) for TopicAndPartitions:Set([fusion-rtlog-std-prod,249], [fusion-rtlog-std-prod,154], [fusion-rtlog-std-prod,2], [qiniuCdnOpenRestyV2,100], [fusion-rtlog-std-prod,40], [fusion-rtlog-std-prod,211], [fusion-rtlog-std-prod,116], [fusion-rtlog-std-prod,59], [qiniuCdnOpenRestyV2,120], [fusion-rtlog-std-prod,230], [fusion-rtlog-std-prod,97], [fusion-rtlog-std-prod,287], [fusion-rtlog-std-prod,268], [fusion-rtlog-std-prod,173], [fusion-rtlog-std-prod,78], [fusion-rtlog-std-prod,192], [fusion-rtlog-std-prod,135]) (kafka.controller.IsrChangeNotificationListener)</code></pre>
+<p>broker-16-state-change.log.2018-01-24-13</p>
+<pre><code>[2018-01-24 13:08:06,551] TRACE Controller 16 epoch 256 sending UpdateMetadata request (Leader:23,ISR:23,LeaderEpoch:41,ControllerEpoch:255) to broker 18 for partition fusion-rtlog-std-prod-230 (state.change.logger)
+[2018-01-24 13:08:06,563] TRACE Broker 16 cached leader info (LeaderAndIsrInfo:(Leader:23,ISR:23,LeaderEpoch:41,ControllerEpoch:255),ReplicationFactor:3),AllReplicas:15,18,23) for partition fusion-rtlog-std-prod-230 in response to UpdateMetadata request sent by controller 16 epoch 256 with correlation id 7 (state.change.logger)</code></pre>
+<p>broker 18 recieved this <code>UpdateMetadata</code> request</p>
+<pre><code>[2018-01-24 13:08:06,577] TRACE Broker 18 cached leader info (LeaderAndIsrInfo:(Leader:23,ISR:23,LeaderEpoch:41,ControllerEpoch:255),ReplicationFactor:3),AllReplicas:15,18,23) for partition fusion-rtlog-std-prod-230 in response to UpdateMetadata request sent by controller 16 epoch 256 with correlation id 7 (state.change.logger)</code></pre>
+<p>at this time, controller 16 thinks partition <code>fusion-rtlog-std-prod-230</code>’s current leader is 23, but broker 18 still hold the previous meta. <code>UpdateMetadata</code> request never work!</p>
+<p>To make a summary, after step 3:</p>
+<ol start="4" type="1">
+<li>controller 16 broadcast meta data</li>
+<li>controller 16 get isr change notification</li>
+<li>controller 16 broadcase new meta data</li>
+<li>broker 18 receviced new meta, but not <strong>update</strong></li>
+</ol>
+<p>return to code, object <code>Partition</code> has two related fields</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">class Partition(val topic: String,</span><br><span class="line">                val partitionId: Int,</span><br><span class="line">                time: Time,</span><br><span class="line">                replicaManager: ReplicaManager) extends Logging with KafkaMetricsGroup &#123;</span><br><span class="line">     <span class="keyword">private</span> var zkVersion: Int = LeaderAndIsr.initialZKVersion</span><br><span class="line">     <span class="meta">@volatile</span> var leaderReplicaIdOpt: Option[Int] = None</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zkVersion</code> indicas <code>dataVersion</code> in zk data structure of path <code>/brokers/topics/&lt;a topic&gt;/partitions/&lt;id&gt;/state</code>, e.g</li>
+</ul>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/flume-kafka/ka-zk-ds.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<ul>
+<li><code>leaderReplicaIdOpt</code> indicas whether the partition is leader</li>
+</ul>
+<p>It seems the two field in <code>Parition</code> has never been updated</p>
+<h1 id="related-issues">Related Issues</h1>
+<p><a href="https://issues.apache.org/jira/browse/KAFKA-3042" target="_blank" rel="noopener">KAFKA-3042 updateIsr should stop after failed several times due to zkVersion issue</a></p>
+<p><a href="https://issues.apache.org/jira/browse/KAFKA-2729" target="_blank" rel="noopener">KAFKA-2729 Cached zkVersion not equal to that in zookeeper, broker not recovering</a></p>
+<p><a href="https://issues.apache.org/jira/browse/KAFKA-3083" target="_blank" rel="noopener">KAFKA-3083 a soft failure in controller may leave a topic partition in an inconsistent state</a></p>
+<h1 id="solutions">Solutions</h1>
+<p>failover by hand: restart controller</p>
+<p>other workaround</p>
+<ol type="1">
+<li><p>increase zk timeout config, default is 6000 ms</p>
+<p>zookeeper.connection.timeout.ms=20000 zookeeper.session.timeout.ms=20000</p></li>
+<li><p>jvm gc tunning, sometimes zk timeout is cause by jvm gc</p></li>
+<li><p>reduce partition number on one broker, the more parition we have, the more meta data we need to synchronize, and more traffic on zk, more meta traffic among brokers</p></li>
+<li><p>increase <code>request.timeout.ms</code> on the broker, especially for lots of partitions per broker</p></li>
+</ol>
+<h1 id="future">Future</h1>
+<p>kafka’s controller is being redesign and re-implemented, the progress can be tracked <a href="https://issues.apache.org/jira/browse/KAFKA-5027" target="_blank" rel="noopener">here</a> and the doc: <a href="https://docs.google.com/document/d/1rLDmzDOGQQeSiMANP0rC2RYp_L7nUGHzFD9MQISgXYM/edit" target="_blank" rel="noopener">Kafka Controller Redesign</a></p>
+<p><a href="https://issues.apache.org/jira/browse/KAFKA-5642" target="_blank" rel="noopener">KAFKA-5642 Use async ZookeeperClient in Controller</a> will properly handle ZK session expiration</p>
+<h1 id="something-about-flume">Something about flume</h1>
+<p>posts/flume-kafka-Sink produce messages batch by batch and will retry after some fail write. During controller election, some partition leaders can’t reach. When a batch write happen, some parition will success, but some failed, when posts/flume-kafka-Sink retry, the success part will be duplicated.</p>
+<h1 id="ref">Ref</h1>
+<p>My kafka version is <code>0.10.0.0</code>, all related logs can be found in <a href="https://drive.google.com/file/d/1g7tf2YYP9AuwBYe4yMLVCgxDmmc2d_dc/view?usp=sharing" target="_blank" rel="noopener">kafka-logs.tar.gz</a></p>
+<p><a href="https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Controller+Internals" target="_blank" rel="noopener">Kafka controller internals</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kafka/" rel="tag"># kafka</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/go-channel-饿死及优先级/" rel="next" title="go channel 的饿死和优先级处理">
+                <i class="fa fa-chevron-left"></i> go channel 的饿死和优先级处理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/kafka-controller-prospects/" rel="prev" title="Kafka Controller 前瞻">
+                Kafka Controller 前瞻 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#the-full-story"><span class="nav-number">1.</span> <span class="nav-text">The Full Story</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#dive-into-log-and-code"><span class="nav-number">2.</span> <span class="nav-text">Dive Into Log And Code</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#related-issues"><span class="nav-number">3.</span> <span class="nav-text">Related Issues</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#solutions"><span class="nav-number">4.</span> <span class="nav-text">Solutions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#future"><span class="nav-number">5.</span> <span class="nav-text">Future</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#something-about-flume"><span class="nav-number">6.</span> <span class="nav-text">Something about flume</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ref"><span class="nav-number">7.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "Flume-KafkaSink-Duplicate-Data-During-Kafka's-controller-election/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

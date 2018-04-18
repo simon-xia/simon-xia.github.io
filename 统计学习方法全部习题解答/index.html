@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="统计学习方法,statistics," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近着手做一个流量预测方面的东西，重新刷一遍蓝皮书巩固下基础知识。 第一章 概论 1.1  说明伯努利模型的极大似然估计以及贝叶斯估计中的统计学习方法三要素  设 \(X \sim b(1, p)\), 则 \(X\) 的分布律为 \[ P\{X=x\} = p^{x}(1-p)^{1-x},  \ \ \ \  x = 0, 1 \] 假设 \(x_{1}, x_{2},\cdots , x_{">
+<meta name="keywords" content="统计学习方法,statistics">
+<meta property="og:type" content="article">
+<meta property="og:title" content="统计学习方法全部习题解答">
+<meta property="og:url" content="http://simonxia.com/统计学习方法全部习题解答/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="最近着手做一个流量预测方面的东西，重新刷一遍蓝皮书巩固下基础知识。 第一章 概论 1.1  说明伯努利模型的极大似然估计以及贝叶斯估计中的统计学习方法三要素  设 \(X \sim b(1, p)\), 则 \(X\) 的分布律为 \[ P\{X=x\} = p^{x}(1-p)^{1-x},  \ \ \ \  x = 0, 1 \] 假设 \(x_{1}, x_{2},\cdots , x_{">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/2.2_plot.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/conv_overview.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/conv_triangle.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-04-17T15:46:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="统计学习方法全部习题解答">
+<meta name="twitter:description" content="最近着手做一个流量预测方面的东西，重新刷一遍蓝皮书巩固下基础知识。 第一章 概论 1.1  说明伯努利模型的极大似然估计以及贝叶斯估计中的统计学习方法三要素  设 \(X \sim b(1, p)\), 则 \(X\) 的分布律为 \[ P\{X=x\} = p^{x}(1-p)^{1-x},  \ \ \ \  x = 0, 1 \] 假设 \(x_{1}, x_{2},\cdots , x_{">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/2.2_plot.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/统计学习方法全部习题解答/"/>
+
+
+
+
+
+  <title>统计学习方法全部习题解答 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/统计学习方法全部习题解答/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">统计学习方法全部习题解答</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-21T08:56:38+08:00">
+                2017-03-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/统计学习方法全部习题解答/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="统计学习方法全部习题解答/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近着手做一个流量预测方面的东西，重新刷一遍蓝皮书巩固下基础知识。</p>
+<h1 id="第一章-概论">第一章 概论</h1>
+<h2 id="section">1.1</h2>
+<blockquote>
+<p>说明伯努利模型的极大似然估计以及贝叶斯估计中的统计学习方法三要素</p>
+</blockquote>
+<p>设 <span class="math inline">\(X \sim b(1, p)\)</span>, 则 <span class="math inline">\(X\)</span> 的分布律为</p>
+<p><span class="math display">\[
+P\{X=x\} = p^{x}(1-p)^{1-x},  \ \ \ \  x = 0, 1
+\]</span></p>
+<p>假设 <span class="math inline">\(x_{1}, x_{2},\cdots , x_{n}\)</span> 是对应于样本 <span class="math inline">\(X\)</span> 的取值，则似然函数为</p>
+<p><span class="math display">\[
+L(p) = \prod_{i = 1}^{n}p^{x_{i}}(1-p)^{1-x_{i}} = p^{\sum_{i=1}^{n}x_{i}}(1-p)^{n-\sum_{i=1}^{n}x_{i}}
+\]</span></p>
+<p>取对数:</p>
+<p><span class="math display">\[
+\ln L(p) = (\sum_{i=1}^{n}x_{i})\ln p+ (n - \sum_{i=1}^{n}x_{i})\ln (1-p)
+\]</span></p>
+<p>对 p 求导</p>
+<p><span class="math display">\[
+\frac{\mathrm{d} }{\mathrm{d} p} \ln L(p)  = \frac{\sum_{i=1}^{n}x_{i}}{p} - \frac{n - \sum_{i=1}^{n}x_{i}}{1-p} = 0
+\]</span></p>
+<p>解得 p 的极大似然估计值为</p>
+<p><span class="math display">\[
+\hat{p} =  \frac{\sum_{i=1}^{n}x_{i}}{n} 
+\]</span></p>
+<p>故，当有 k 个 <span class="math inline">\(x_{i}\)</span> 取值为 1 时， <span class="math inline">\(\hat{p} = \frac{k}{n}\)</span></p>
+<a id="more"></a>
+<h2 id="section-1">1.2</h2>
+<blockquote>
+<p>通过经验风险最小化推导极大似然估计，证明模型是条件概率分布，当损失函数为对数损失函数时，经验风险最小化等价于极大似然估计。</p>
+</blockquote>
+<p>模型是条件概率分布 <span class="math inline">\(P(Y|X)\)</span>. 损失函数为对数损失，则经验风险为</p>
+<p><span class="math display">\[
+R_{emp} = \frac{\sum_{i=1}^{N}{L(y_{i},f(x_{i}))}}{N} = \frac{-\sum_{i=1}^{N}{\log P(y_{i}|x_{i})}}{N} = \frac{-\log \prod_{i=1}^{N}{P(y_{i}|x_{i})}}{N}
+\]</span></p>
+<p>使其最小，则求解目标为</p>
+<p><span class="math display">\[
+\hat{\Theta} =  \underset{\Theta }{argmin}\frac{-\log \prod_{i=1}^{N}{P(y_{i}|x_{i}, \Theta)}}{N}
+\]</span></p>
+<p>由极大似然估计法</p>
+<p><span class="math display">\[
+L(y_{1}, y_{2},\cdots , y_{n}|x_{1}, x_{2},\cdots , x_{n}) = \prod_{i=1}^{N}{P(y_{i}|x_{i}, \Theta})
+\]</span></p>
+<p>求解目标为</p>
+<p><span class="math display">\[
+\hat{\Theta} = \underset{\Theta }{argmax} \prod_{i=1}^{N}{P(y_{i}|x_{i}, \Theta)}
+\]</span></p>
+<p>因为 log(x) 为单调函数，去除负号，忽略常数项 <span class="math inline">\(\frac{1}{N}\)</span>，可见两者求解目标一致，故等价</p>
+<h1 id="第二章-感知机">第二章 感知机</h1>
+<h2 id="section-2">2.2</h2>
+<blockquote>
+<p>模仿例题 2.1，构建从训练数据集求解感知机模型的例子.</p>
+</blockquote>
+<p>选取一个线性可分的数据集，以 <a href="https://github.com/pbharrin/machinelearninginaction/blob/master/Ch06/testSet.txt" target="_blank" rel="noopener">ml in action</a> 中的一个数据集为例</p>
+<div><div class="fold_hider"><div class="close hider_title">testSet.txt 点击展开隐藏内容</div></div><div class="fold">
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line">3.542485	1.977398	-1</span><br><span class="line">3.018896	2.556416	-1</span><br><span class="line">7.551510	-1.580030	1</span><br><span class="line">2.114999	-0.004466	-1</span><br><span class="line">8.127113	1.274372	1</span><br><span class="line">7.108772	-0.986906	1</span><br><span class="line">8.610639	2.046708	1</span><br><span class="line">2.326297	0.265213	-1</span><br><span class="line">3.634009	1.730537	-1</span><br><span class="line">0.341367	-0.894998	-1</span><br><span class="line">3.125951	0.293251	-1</span><br><span class="line">2.123252	-0.783563	-1</span><br><span class="line">0.887835	-2.797792	-1</span><br><span class="line">7.139979	-2.329896	1</span><br><span class="line">1.696414	-1.212496	-1</span><br><span class="line">8.117032	0.623493	1</span><br><span class="line">8.497162	-0.266649	1</span><br><span class="line">4.658191	3.507396	-1</span><br><span class="line">8.197181	1.545132	1</span><br><span class="line">1.208047	0.213100	-1</span><br><span class="line">1.928486	-0.321870	-1</span><br><span class="line">2.175808	-0.014527	-1</span><br><span class="line">7.886608	0.461755	1</span><br><span class="line">3.223038	-0.552392	-1</span><br><span class="line">3.628502	2.190585	-1</span><br><span class="line">7.407860	-0.121961	1</span><br><span class="line">7.286357	0.251077	1</span><br><span class="line">2.301095	-0.533988	-1</span><br><span class="line">-0.232542	-0.547690	-1</span><br><span class="line">3.457096	-0.082216	-1</span><br><span class="line">3.023938	-0.057392	-1</span><br><span class="line">8.015003	0.885325	1</span><br><span class="line">8.991748	0.923154	1</span><br><span class="line">7.916831	-1.781735	1</span><br><span class="line">7.616862	-0.217958	1</span><br><span class="line">2.450939	0.744967	-1</span><br><span class="line">7.270337	-2.507834	1</span><br><span class="line">1.749721	-0.961902	-1</span><br><span class="line">1.803111	-0.176349	-1</span><br><span class="line">8.804461	3.044301	1</span><br><span class="line">1.231257	-0.568573	-1</span><br><span class="line">2.074915	1.410550	-1</span><br><span class="line">-0.743036	-1.736103	-1</span><br><span class="line">3.536555	3.964960	-1</span><br><span class="line">8.410143	0.025606	1</span><br><span class="line">7.382988	-0.478764	1</span><br><span class="line">6.960661	-0.245353	1</span><br><span class="line">8.234460	0.701868	1</span><br><span class="line">8.168618	-0.903835	1</span><br><span class="line">1.534187	-0.622492	-1</span><br><span class="line">9.229518	2.066088	1</span><br><span class="line">7.886242	0.191813	1</span><br><span class="line">2.893743	-1.643468	-1</span><br><span class="line">1.870457	-1.040420	-1</span><br><span class="line">5.286862	-2.358286	1</span><br><span class="line">6.080573	0.418886	1</span><br><span class="line">2.544314	1.714165	-1</span><br><span class="line">6.016004	-3.753712	1</span><br><span class="line">0.926310	-0.564359	-1</span><br><span class="line">0.870296	-0.109952	-1</span><br><span class="line">2.369345	1.375695	-1</span><br><span class="line">1.363782	-0.254082	-1</span><br><span class="line">7.279460	-0.189572	1</span><br><span class="line">1.896005	0.515080	-1</span><br><span class="line">8.102154	-0.603875	1</span><br><span class="line">2.529893	0.662657	-1</span><br><span class="line">1.963874	-0.365233	-1</span><br><span class="line">8.132048	0.785914	1</span><br><span class="line">8.245938	0.372366	1</span><br><span class="line">6.543888	0.433164	1</span><br><span class="line">-0.236713	-5.766721	-1</span><br><span class="line">8.112593	0.295839	1</span><br><span class="line">9.803425	1.495167	1</span><br><span class="line">1.497407	-0.552916	-1</span><br><span class="line">1.336267	-1.632889	-1</span><br><span class="line">9.205805	-0.586480	1</span><br><span class="line">1.966279	-1.840439	-1</span><br><span class="line">8.398012	1.584918	1</span><br><span class="line">7.239953	-1.764292	1</span><br><span class="line">7.556201	0.241185	1</span><br><span class="line">9.015509	0.345019	1</span><br><span class="line">8.266085	-0.230977	1</span><br><span class="line">8.545620	2.788799	1</span><br><span class="line">9.295969	1.346332	1</span><br><span class="line">2.404234	0.570278	-1</span><br><span class="line">2.037772	0.021919	-1</span><br><span class="line">1.727631	-0.453143	-1</span><br><span class="line">1.979395	-0.050773	-1</span><br><span class="line">8.092288	-1.372433	1</span><br><span class="line">1.667645	0.239204	-1</span><br><span class="line">9.854303	1.365116	1</span><br><span class="line">7.921057	-1.327587	1</span><br><span class="line">8.500757	1.492372	1</span><br><span class="line">1.339746	-0.291183	-1</span><br><span class="line">3.107511	0.758367	-1</span><br><span class="line">2.609525	0.902979	-1</span><br><span class="line">3.263585	1.367898	-1</span><br><span class="line">2.912122	-0.202359	-1</span><br><span class="line">1.731786	0.589096	-1</span><br><span class="line">2.387003	1.573131	-1</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<p>分别以原始形式和对偶形式编码求解作图</p>
+<div><div class="fold_hider"><div class="close hider_title">2.2.py 点击展开隐藏内容</div></div><div class="fold">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">original_form_train</span><span class="params">(data, yita)</span>:</span></span><br><span class="line">    dim = data.shape[<span class="number">1</span>] - <span class="number">1</span></span><br><span class="line">    w = np.zeros(dim)</span><br><span class="line">    b = <span class="number">0</span></span><br><span class="line">    unchange = <span class="keyword">False</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> unchange:</span><br><span class="line">        unchange = <span class="keyword">True</span></span><br><span class="line">        <span class="keyword">for</span> idx, row <span class="keyword">in</span> data.sample(frac=<span class="number">1</span>).iterrows(): <span class="comment"># sample method shuffle rows</span></span><br><span class="line">            <span class="keyword">if</span> row[dim] * (np.dot(w, row[:dim]) + b) &gt; <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            </span><br><span class="line">            unchange = <span class="keyword">False</span></span><br><span class="line">            w += yita * row[dim] * row[:dim]</span><br><span class="line">            b += yita*row[dim]</span><br><span class="line">    <span class="keyword">return</span> w, b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dual_form_train</span><span class="params">(data, yita)</span>:</span></span><br><span class="line">    alpha = np.zeros(data.shape[<span class="number">0</span>])</span><br><span class="line">    b = <span class="number">0</span></span><br><span class="line">    gram = np.dot(data[[<span class="number">0</span>,<span class="number">1</span>]], data[[<span class="number">0</span>,<span class="number">1</span>]].T)</span><br><span class="line">    unchange = <span class="keyword">False</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> unchange:</span><br><span class="line">        unchange = <span class="keyword">True</span></span><br><span class="line">        <span class="keyword">for</span> idx, row <span class="keyword">in</span> data.iterrows():</span><br><span class="line">            <span class="keyword">if</span> row[<span class="number">2</span>] * (np.dot(alpha * data[<span class="number">2</span>], gram[:][idx])  + b) &gt; <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            </span><br><span class="line">            unchange = <span class="keyword">False</span></span><br><span class="line">            alpha[idx] += yita</span><br><span class="line">            b += yita*row[<span class="number">2</span>]</span><br><span class="line">    <span class="keyword">return</span> np.dot(alpha*data[<span class="number">2</span>], data.iloc[:,:<span class="number">2</span>]), b</span><br><span class="line"></span><br><span class="line">d = pd.read_csv(<span class="string">"testSet.txt"</span>,  sep=<span class="string">"\t"</span>, header=<span class="keyword">None</span>)</span><br><span class="line"></span><br><span class="line">yita = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">w1, b1 = original_form_train(d, yita)</span><br><span class="line">print(w1, b1) </span><br><span class="line"></span><br><span class="line">w2, b2 = dual_form_train(d, yita)</span><br><span class="line">print(w2, b2) </span><br><span class="line"></span><br><span class="line">plt.scatter(d[d[<span class="number">2</span>]==<span class="number">1</span>][<span class="number">0</span>], d[d[<span class="number">2</span>]==<span class="number">1</span>][<span class="number">1</span>], c=<span class="string">"g"</span>)</span><br><span class="line">plt.scatter(d[d[<span class="number">2</span>]==<span class="number">-1</span>][<span class="number">0</span>], d[d[<span class="number">2</span>]==<span class="number">-1</span>][<span class="number">1</span>], c=<span class="string">"r"</span>)</span><br><span class="line"></span><br><span class="line">x1 = np.linspace(d[<span class="number">0</span>].min(), d[<span class="number">0</span>].max(), <span class="number">1000</span>)</span><br><span class="line">x21 = (-b1 - w1[<span class="number">0</span>]*x1) / w1[<span class="number">1</span>]</span><br><span class="line">x22 = (-b2 - w2[<span class="number">0</span>]*x1) / w2[<span class="number">1</span>]</span><br><span class="line">plt.plot(x1, x21, c=<span class="string">'k'</span>)</span><br><span class="line">plt.plot(x1, x22, c=<span class="string">'b'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+</div></div>
+<p>画出结果如下：</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/2.2_plot.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<h2 id="section-3">2.3</h2>
+<blockquote>
+<p>证明：样本集线性可分的充分必要条件是正实例点集和负实例点集所构成的凸壳互不相交</p>
+</blockquote>
+<ol type="1">
+<li>必要性证明，即线性可分 =&gt; 凸壳不相交</li>
+</ol>
+<p>由样本集线性可分可知，存在平面 <span class="math inline">\(\omega \cdot x + b = 0\)</span> 使得对任意正样本 <span class="math inline">\(x_{+}\)</span> 有 <span class="math inline">\(\omega \cdot x_{+} + b &gt; 0\)</span></p>
+<p>带入凸壳定义: <span class="math inline">\(conv(S) = \left \{ x= \sum_{i=1}^{k} \lambda_{i}x_{i} | \sum_{i=1}^{k}\lambda_{i}=1, \lambda_{i}\geq 0, i=1,2,\cdots,k \right \}\)</span></p>
+<p><span class="math display">\[
+\omega \cdot x_{+} + b = \omega \cdot \sum_{i=1}^{k} \lambda_{i}x_{i} + b =  \sum_{i=1}^{k} \lambda_{i} (\omega \cdot x_{i} + b ) &gt; 0
+\]</span></p>
+<p>即所有正样本构成的凸壳均满足 <span class="math inline">\(\omega \cdot x + b &gt; 0\)</span></p>
+<p>同理，对于负样本构成的凸壳有 <span class="math inline">\(\omega \cdot x + b &lt; 0\)</span>, 若两凸壳相交，则交集中的点必然同时满足两个不等式，显然不成立，故两凸壳不相交。</p>
+<ol start="2" type="1">
+<li>充分性证明，即凸壳不相交 =&gt; 线性可分</li>
+</ol>
+<p>定义两凸壳的距离为两凸壳中最近两点的距离，即令 <span class="math inline">\(x_{+}\)</span> 属于正样本凸壳 <span class="math inline">\(S_{+}\)</span>, <span class="math inline">\(x_{-}\)</span> 属于负样本凸壳 <span class="math inline">\(S_{-}\)</span>， 则两凸壳间距离为: <span class="math inline">\(d = min \left (\left \| x_{+} - x_{-} \right \| \right )\)</span></p>
+<p>设取到最短距离时的正负样本 <span class="math inline">\(x\)</span> 分别为 <span class="math inline">\(x_{min+}\)</span>,<span class="math inline">\(x_{min-}\)</span>，构造平面 <span class="math inline">\(\omega \cdot x + b = 0\)</span> 其中</p>
+<p><span class="math display">\[
+\omega = x_{min+} - x_{min-} 
+\]</span> <span class="math display">\[
+b = -\frac{x_{min+} \cdot x_{min+} - x_{min-} \cdot x_{min-}}{2}
+\]</span></p>
+<p>则对所有 <span class="math inline">\(x\)</span>:</p>
+<p><span class="math display">\[
+\omega \cdot x + b = (x_{min+} - x_{min-}) \cdot x  -\frac{x_{min+} \cdot x_{min+} - x_{min-} \cdot x_{min-}}{2} = \frac{\left \| x_{min-} - x \right \|^{2} - \left \| x_{min+} - x \right \|^{2}}{2}
+\]</span></p>
+<p>下面以某个正样本 <span class="math inline">\(x\)</span> 为例，证明 <span class="math inline">\(\left \| x_{min-} - x \right \|^{2} - \left \| x_{min+} - x \right \|^{2}\)</span> &gt; 0 即线段 <span class="math inline">\(xx_{min-} &gt; xx_{min+}\)</span>。</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/conv_overview.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>用反证法，假设线段 <span class="math inline">\(xx_{min-} &lt; xx_{min+}\)</span> ，过 <span class="math inline">\(x_{min-}\)</span> 向 <span class="math inline">\(xx_{min+}\)</span> 做垂线交于点K。如下图所示</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/conv_triangle.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>由凸壳的性质 <span class="math inline">\(x,x_{min+}\)</span> 均在凸壳 <span class="math inline">\(S_{+}\)</span> 内，则它们连线上的点 K 也在凸壳 <span class="math inline">\(S_{+}\)</span> 内。由直角三角形性质易得线段 <span class="math inline">\(Kx_{min-} &lt; x_{min-}x_{min+}\)</span> 这与 <span class="math inline">\(x_{min-}x_{min+}\)</span> 是两凸壳最短距离的点矛盾，故对于位于正样本凸壳中的任意 <span class="math inline">\(x\)</span> 有 <span class="math inline">\(xx_{min-} &gt; xx_{min+}\)</span>. 从而使式 满足 <span class="math inline">\(\omega \cdot x + b &gt; 0\)</span></p>
+<p>负样本同理，至此，线性可分得证。</p>
+<h1 id="第三章-knn">第三章 kNN</h1>
+<h2 id="section-4">3.2</h2>
+<blockquote>
+<p>利用例题3.2构造的 kd 树求点 <span class="math inline">\(x = (3,4.5)^{T}\)</span> 的最邻近点.</p>
+</blockquote>
+<ol type="1">
+<li>从根节点 (7, 2) 开始, 3 &lt; 7 进入左儿子 (5,4), 4.5 &gt; 4 进入左儿子 (4, 7), 计算欧氏距离为 2.69, 即当前小距离 <span class="math inline">\(d_{min} = 2.69\)</span></li>
+<li>向上回退到父节点 (5, 4) 计算距离为 2.06, 更新 <span class="math inline">\(d_{min} = 2.06\)</span></li>
+<li>检查 (5, 4) 的另一个子节点 (2, 3)，计算距离为 1.803，即（2，3）位于以 (3,4.5) 为圆心，当前 <span class="math inline">\(d_{min} = 2.06\)</span> 为半径的超球体内，故将 (2,3) 作为当前最近点. 更新 <span class="math inline">\(d_{min} = 1.803\)</span></li>
+<li>当前最近点 (2,3) 为叶节点，回退直到根 (7,2), (7, 2) 到目标点距离为 4.72, 不满足条件</li>
+<li>检查根节点 (7,2) 的另一个子节点 (9,6), 计算距离为 6.18，在步骤3所述的超球体外，搜索结束，最近点为 (2,3)。</li>
+</ol>
+<h2 id="section-5">3.3</h2>
+<blockquote>
+<p>参照算法 3.3，写出输出为 x 的 K 近邻的算法。</p>
+</blockquote>
+<p>将以前算法的「当前最近点」替换为「当前最近点最小堆」即可。具体地</p>
+<ul>
+<li>以前的「比当前最小距离小」替换为「比当前最小堆中的最大距离小」</li>
+<li>以前的「是否替换当前最近点」替换为「是否插入最小堆」</li>
+</ul>
+<h1 id="第四章-朴素贝叶斯">第四章 朴素贝叶斯</h1>
+<h2 id="section-6">4.1</h2>
+<blockquote>
+<p>用极大似然估计法推出朴素贝叶斯法中的概率估计公式(4.8)及公式(4.9)</p>
+</blockquote>
+<p>令 <span class="math inline">\(P\left ( Y = c_{k} \right ) = p\)</span>，则 <span class="math inline">\(P\left ( Y \neq c_{k} \right ) = 1 - p\)</span>. 即 <span class="math inline">\(P\left ( Y = c_{k} \right )\)</span> 服从伯努利分布。则公式(4.8) 证明同 1.1</p>
+<p>令 <span class="math inline">\(P\left ( Y = c_{k}, X^{j} = x^{j} \right ) = p\)</span>，则 <span class="math inline">\(P\left ( Y = c_{k}, X^{j} \neq x^{j} \right ) = 1 - p\)</span>. 即 <span class="math inline">\(P\left ( Y = c_{k}, X^{j} = x^{j} \right )\)</span> 服从伯努利分布。则公式(4.9) 证明同 1.1</p>
+<h2 id="section-7">4.2</h2>
+<blockquote>
+<p>用贝叶斯估计法推出朴素贝叶斯法中的概率估计公式(4.10)及公式(4.11)</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/统计学习方法/" rel="tag"># 统计学习方法</a>
+          
+            <a href="/tags/statistics/" rel="tag"># statistics</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/move-kafka-partitons-between-disks/" rel="next" title="Moving Kafka Replica Between Disk">
+                <i class="fa fa-chevron-left"></i> Moving Kafka Replica Between Disk
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/go-channel-饿死及优先级/" rel="prev" title="go channel 的饿死和优先级处理">
+                go channel 的饿死和优先级处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章-概论"><span class="nav-number">1.</span> <span class="nav-text">第一章 概论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section"><span class="nav-number">1.1.</span> <span class="nav-text">1.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-1"><span class="nav-number">1.2.</span> <span class="nav-text">1.2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-感知机"><span class="nav-number">2.</span> <span class="nav-text">第二章 感知机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-2"><span class="nav-number">2.1.</span> <span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-3"><span class="nav-number">2.2.</span> <span class="nav-text">2.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第三章-knn"><span class="nav-number">3.</span> <span class="nav-text">第三章 kNN</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-4"><span class="nav-number">3.1.</span> <span class="nav-text">3.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-5"><span class="nav-number">3.2.</span> <span class="nav-text">3.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第四章-朴素贝叶斯"><span class="nav-number">4.</span> <span class="nav-text">第四章 朴素贝叶斯</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-6"><span class="nav-number">4.1.</span> <span class="nav-text">4.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-7"><span class="nav-number">4.2.</span> <span class="nav-text">4.2</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "统计学习方法全部习题解答/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
