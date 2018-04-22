@@ -88,7 +88,7 @@
 <meta property="og:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
-<meta property="og:updated_time" content="2018-02-02T17:37:30.000Z">
+<meta property="og:updated_time" content="2018-04-22T08:20:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Moving Kafka Replica Between Disk">
 <meta name="twitter:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
@@ -441,7 +441,7 @@ metrics 15 185980984
 <h2 id="step-2-migrating-meta-in-replica-offset-file">Step 2: Migrating meta in replica offset file</h2>
 <p>Similar to step 1, except that the file is changed to <code>replication-offset-checkpoint</code></p>
 <h2 id="step-3-move-partition-data">Step 3: Move partition data</h2>
-<pre><code>cp -r /disk12/kafka-logs/metrics-15 /disk7/kafka-logs/metrics-15</code></pre>
+<pre><code>mv /disk12/kafka-logs/metrics-15 /disk7/kafka-logs/metrics-15</code></pre>
 <h2 id="step-4-restart-the-broker">Step 4: Restart the broker</h2>
 
       

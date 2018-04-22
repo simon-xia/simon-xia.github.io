@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://simonxia.com/be-careful-with-golang-embedded-error/</loc>
+    <loc>http://simonxia.com/move-kafka-partitons-between-disks/</loc>
     
-    <lastmod>2018-04-18T09:03:53.000Z</lastmod>
+    <lastmod>2018-04-22T08:20:06.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://simonxia.com/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E5%85%A8%E9%83%A8%E4%B9%A0%E9%A2%98%E8%A7%A3%E7%AD%94/</loc>
     
-    <lastmod>2018-04-17T15:46:34.000Z</lastmod>
+    <lastmod>2018-04-18T13:52:16.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://simonxia.com/be-careful-with-golang-embedded-error/</loc>
+    
+    <lastmod>2018-04-18T09:03:53.000Z</lastmod>
     
   </url>
   
@@ -47,13 +54,6 @@
     <loc>http://simonxia.com/about/index.html</loc>
     
     <lastmod>2018-02-03T06:38:25.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://simonxia.com/move-kafka-partitons-between-disks/</loc>
-    
-    <lastmod>2018-02-02T17:37:30.000Z</lastmod>
     
   </url>
   
