@@ -300,6 +300,361 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/抢购demo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/抢购demo/" itemprop="url">一个小型抢购系统demo——饿了么大学生黑客马拉松小结</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-02T14:30:00+08:00">
+                2015-12-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/抢购demo/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="抢购demo/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="题目内容">题目内容</h1>
+<p>简单地说就是，实现给定的api并尽可能地提高并发量。</p>
+<p>具体规则详见官网：<a href="http://hackathon.ele.me/intro#intro-general" target="_blank" rel="noopener">饿了么全国大学生黑客马拉松</a></p>
+<h1 id="初步设计">初步设计</h1>
+<p>redis 存储 按照业务逻辑拆分为4个库，各司其职，分别如下：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Db name</th>
+<th>Key type</th>
+<th>Key</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>accessTokenDb</td>
+<td>k-v</td>
+<td>accessToken</td>
+</tr>
+<tr class="even">
+<td>cartDb</td>
+<td>hash</td>
+<td>cartid</td>
+</tr>
+<tr class="odd">
+<td>orderDb</td>
+<td>hash</td>
+<td>accessToken</td>
+</tr>
+<tr class="even">
+<td>hasorderedset</td>
+<td>set</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>登陆 accessTokenDb 创建和添加购物车 cartDb 下单 orderDb 判断下单唯一性 set</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/抢购demo/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/HTTP2-前瞻/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/HTTP2-前瞻/" itemprop="url">HTTP2 前瞻</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-03-22T15:30:26+08:00">
+                2015-03-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/network/" itemprop="url" rel="index">
+                    <span itemprop="name">network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/HTTP2-前瞻/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="HTTP2-前瞻/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>这两天和<a href="http://www.zhihu.com/people/ye-lou-jiang" target="_blank" rel="noopener">液漏酱</a>同学一起翻译<a href="http://daniel.haxx.se/" target="_blank" rel="noopener">Daniel Stenberg</a>的<a href="http://daniel.haxx.se/http2/" target="_blank" rel="noopener">http2 explained</a> ，发现http2有很多让人期待的特性，本文在此做一个简单介绍。</p>
+<p>前天正好是Daniel代表作curl的<a href="http://daniel.haxx.se/blog/2015/03/20/curl-17-years-old-today/" target="_blank" rel="noopener">17岁生日</a>，在此祝这位HTTP协议界的前辈生日快乐！ XD</p>
+<h1 id="二进制">二进制</h1>
+<p>http2将全面启用二进制，主要有以下两大优势：</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/HTTP2-前瞻/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://simonxia.com/那些先贤们的奇技淫巧/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1161,7 +1516,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1183,7 +1538,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

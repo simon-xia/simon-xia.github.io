@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="kafka," />
+  <meta name="keywords" content="Simon, Xia" />
 
 
 
@@ -79,20 +79,16 @@
 
 
 
-<meta name="description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
-<meta name="keywords" content="kafka">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Moving Kafka Replica Between Disk">
-<meta property="og:url" content="http://simonxia.com/move-kafka-partitons-between-disks/index.html">
+<meta name="description" content="写程序的少年，走在市井之间">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Simon Xia">
+<meta property="og:url" content="http://simonxia.com/tags/衰减平均/index.html">
 <meta property="og:site_name" content="Simon Xia">
-<meta property="og:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
+<meta property="og:description" content="写程序的少年，走在市井之间">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
-<meta property="og:updated_time" content="2018-04-22T08:20:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Moving Kafka Replica Between Disk">
-<meta name="twitter:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
-<meta name="twitter:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
+<meta name="twitter:title" content="Simon Xia">
+<meta name="twitter:description" content="写程序的少年，走在市井之间">
 
 
 
@@ -122,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://simonxia.com/move-kafka-partitons-between-disks/"/>
+  <link rel="canonical" href="http://simonxia.com/tags/衰减平均/"/>
 
 
 
 
 
-  <title>Moving Kafka Replica Between Disk | Simon Xia</title>
+  <title>Tag: 衰减平均 | Simon Xia</title>
   
 
 
@@ -147,7 +143,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -289,229 +285,54 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  
+  
+  
+  <div class="post-block tag">
 
-  
+    <div id="posts" class="posts-collapse">
+      <div class="collection-title">
+        <h2>衰减平均<small>Tag</small>
+        </h2>
+      </div>
 
-  
-  
-  
+      
+        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://simonxia.com/move-kafka-partitons-between-disks/">
+    <header class="post-header">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Simon Xia">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Simon Xia">
-    </span>
-
-    
-      <header class="post-header">
-
+      <h3 class="post-title">
         
+            <a class="post-title-link" href="/衰减平均与衰减标准差/" itemprop="url">
+              
+                <span itemprop="name">衰减平均与衰减标准差</span>
+              
+            </a>
         
-          <h2 class="post-title" itemprop="name headline">Moving Kafka Replica Between Disk</h2>
-        
+      </h3>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-27T15:30:26+08:00">
-                2016-12-27
-              </time>
-            
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2016-08-14T20:20:04+08:00"
+              content="2016-08-14" >
+          08-14
+        </time>
+      </div>
 
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/infra/" itemprop="url" rel="index">
-                    <span itemprop="name">infra</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/move-kafka-partitons-between-disks/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="move-kafka-partitons-between-disks/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <p>As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is full, IOException occurs.</p>
-<a id="more"></a>
-<h1 id="fundamentals">Fundamentals</h1>
-<p>So we have to do this by hand. Before we start, let’s take a look at some fundamentals about kafka’s log partiton</p>
-<p>There are four files under each kafka data directory(path config in <code>log.dirs</code>), in addition to the replica log data directory.</p>
-<ul>
-<li><code>cleaner-offset-checkpoint</code></li>
-<li><p><code>recovery-point-offset-checkpoint</code></p>
-<p>As its name suggests, this file is used when broker restart, initialize the internal state of <code>LogManager</code>. Each time broker flush log, current <code>LogEndOffset</code> will be written to the file.</p></li>
-<li><p><code>replication-offset-checkpoint</code></p>
-<p>This file records the high watermark of partitions. The high watermark is the offset of the last message that was successfully copied to all of the log’s replicas</p></li>
-<li><p><code>meta.properties</code> holds the version and id of broker</p></li>
-</ul>
-<p>Difference between Log end offset(LEO) and High Watermark(HW) is shown below. More details can be found <a href="http://www.confluent.io/blog/hands-free-kafka-replication-a-lesson-in-operational-simplicity/" target="_blank" rel="noopener">here</a>.</p>
-<p><img src="/img/move-kafka/mk-partition.png"></p>
-<h1 id="steps">Steps</h1>
-<p>Let’s take a look at one example</p>
-<pre><code> ~$ du -hd 1 /disk12/kafka-logs/
- 176G    /disk12/kafka-logs/midsource-fsrcproxy1-9
- 90G     /disk12/kafka-logs/dns-formated-log-48
- 270G    /disk12/kafka-logs/metrics-15
- ...</code></pre>
-<p>now we want to move partition <code>metrics-15</code> to another disk, for example <code>/disk7/kafka-logs</code></p>
-<h2 id="step-0-stop-the-broker">Step 0: Stop the broker</h2>
-<h2 id="step-1-migrating-meta-in-recovery-file">Step 1: Migrating meta in recovery file</h2>
-<pre><code>~$ cat /disk12/kafka-logs/recovery-point-offset-checkpoint
-0
-41
-...
-metrics 15 185980984
-...</code></pre>
-<p>Main format of this file is <code>&lt;topic&gt; &lt;partition id&gt; &lt;LogEndOffset&gt;</code>, find our target partition, cut the line, and paste the line into <code>/disk7/kafka-logs/recovery-point-offset-checkpoint</code></p>
-<p>The second line shows how many partition under this log data dir. After we move partition, it should be reduced by one, so we change it from <code>41</code> to <code>40</code>.</p>
-<p>At the same time the second line number in <code>/disk7/kafka-logs/recovery-point-offset-checkpoint</code> should be added one</p>
-<h2 id="step-2-migrating-meta-in-replica-offset-file">Step 2: Migrating meta in replica offset file</h2>
-<p>Similar to step 1, except that the file is changed to <code>replication-offset-checkpoint</code></p>
-<h2 id="step-3-move-partition-data">Step 3: Move partition data</h2>
-<pre><code>mv /disk12/kafka-logs/metrics-15 /disk7/kafka-logs/metrics-15</code></pre>
-<h2 id="step-4-restart-the-broker">Step 4: Restart the broker</h2>
-
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/kafka/" rel="tag"># kafka</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/一次写缓存优化的经历/" rel="next" title="记一次写磁盘的缓存优化">
-                <i class="fa fa-chevron-left"></i> 记一次写磁盘的缓存优化
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/统计学习方法全部习题解答/" rel="prev" title="《统计学习方法》全部习题解答">
-                《统计学习方法》全部习题解答 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
+    </header>
   </article>
 
 
-
-    <div class="post-spread">
-      
-        <!-- Go to www.addthis.com/dashboard to customize your tools -->
-<div class="addthis_inline_share_toolbox">
-  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
-</div>
-
       
     </div>
+
   </div>
+  
+  
+  
+
+  
 
 
           </div>
@@ -519,15 +340,6 @@ metrics 15 185980984
 
 
           
-
-  
-    <div class="comments" id="comments">
-      <div id="hypercomments_widget"></div>
-    </div>
-
-  
-
-
 
         </div>
         
@@ -548,17 +360,8 @@ metrics 15 185980984
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -656,22 +459,6 @@ metrics 15 185980984
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#fundamentals"><span class="nav-number">1.</span> <span class="nav-text">Fundamentals</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#steps"><span class="nav-number">2.</span> <span class="nav-text">Steps</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#step-0-stop-the-broker"><span class="nav-number">2.1.</span> <span class="nav-text">Step 0: Stop the broker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-1-migrating-meta-in-recovery-file"><span class="nav-number">2.2.</span> <span class="nav-text">Step 1: Migrating meta in recovery file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-2-migrating-meta-in-replica-offset-file"><span class="nav-number">2.3.</span> <span class="nav-text">Step 2: Migrating meta in replica offset file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-3-move-partition-data"><span class="nav-number">2.4.</span> <span class="nav-text">Step 3: Move partition data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-4-restart-the-broker"><span class="nav-number">2.5.</span> <span class="nav-text">Step 4: Restart the broker</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -816,10 +603,6 @@ metrics 15 185980984
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
 
   
 
@@ -843,8 +626,6 @@ metrics 15 185980984
 
 		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
-		
-		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "move-kafka-partitons-between-disks/"});
 		
 
 		(function() {
@@ -904,6 +685,26 @@ metrics 15 185980984
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 

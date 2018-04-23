@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="kafka," />
+  <meta name="keywords" content="衰减平均,G1," />
 
 
 
@@ -79,20 +79,21 @@
 
 
 
-<meta name="description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
-<meta name="keywords" content="kafka">
+<meta name="description" content="概述 衰减平均（Decaying Average）是一种简单的数学方法，用来计算一个数列的平均，核心是给近期的数据更高的权重，即强调近期数据对结果的影响。 衰减平均计算公式如下： \[ \begin{cases} davg_{n} = v_{n} &amp;amp; \text{ if } n=1 \\  davg_{n} = (1 - \alpha ) * v_{n} + \alpha * davg_{">
+<meta name="keywords" content="衰减平均,G1">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Moving Kafka Replica Between Disk">
-<meta property="og:url" content="http://simonxia.com/move-kafka-partitons-between-disks/index.html">
+<meta property="og:title" content="衰减平均与衰减标准差">
+<meta property="og:url" content="http://simonxia.com/衰减平均与衰减标准差/index.html">
 <meta property="og:site_name" content="Simon Xia">
-<meta property="og:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
+<meta property="og:description" content="概述 衰减平均（Decaying Average）是一种简单的数学方法，用来计算一个数列的平均，核心是给近期的数据更高的权重，即强调近期数据对结果的影响。 衰减平均计算公式如下： \[ \begin{cases} davg_{n} = v_{n} &amp;amp; \text{ if } n=1 \\  davg_{n} = (1 - \alpha ) * v_{n} + \alpha * davg_{">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
-<meta property="og:updated_time" content="2018-04-22T08:20:06.000Z">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/davg/davg.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/davg/weight.png">
+<meta property="og:updated_time" content="2018-05-26T23:51:57.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Moving Kafka Replica Between Disk">
-<meta name="twitter:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
-<meta name="twitter:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
+<meta name="twitter:title" content="衰减平均与衰减标准差">
+<meta name="twitter:description" content="概述 衰减平均（Decaying Average）是一种简单的数学方法，用来计算一个数列的平均，核心是给近期的数据更高的权重，即强调近期数据对结果的影响。 衰减平均计算公式如下： \[ \begin{cases} davg_{n} = v_{n} &amp;amp; \text{ if } n=1 \\  davg_{n} = (1 - \alpha ) * v_{n} + \alpha * davg_{">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/davg/davg.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
 
 
 
@@ -122,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="http://simonxia.com/move-kafka-partitons-between-disks/"/>
+  <link rel="canonical" href="http://simonxia.com/衰减平均与衰减标准差/"/>
 
 
 
 
 
-  <title>Moving Kafka Replica Between Disk | Simon Xia</title>
+  <title>衰减平均与衰减标准差 | Simon Xia</title>
   
 
 
@@ -303,7 +304,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://simonxia.com/move-kafka-partitons-between-disks/">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/衰减平均与衰减标准差/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Simon Xia">
@@ -320,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Moving Kafka Replica Between Disk</h2>
+          <h2 class="post-title" itemprop="name headline">衰减平均与衰减标准差</h2>
         
 
         <div class="post-meta">
@@ -332,8 +333,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-27T15:30:26+08:00">
-                2016-12-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-14T20:20:04+08:00">
+                2016-08-14
               </time>
             
 
@@ -355,8 +356,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/infra/" itemprop="url" rel="index">
-                    <span itemprop="name">infra</span>
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
                   </a>
                 </span>
 
@@ -374,8 +375,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/move-kafka-partitons-between-disks/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="move-kafka-partitons-between-disks/" itemprop="commentsCount"></span>
+                <a href="/衰减平均与衰减标准差/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="衰减平均与衰减标准差/" itemprop="commentsCount"></span>
                 </a>
               </span>
               <!--/noindex-->
@@ -404,45 +405,40 @@
       
 
       
-        <p>As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is full, IOException occurs.</p>
-<a id="more"></a>
-<h1 id="fundamentals">Fundamentals</h1>
-<p>So we have to do this by hand. Before we start, let’s take a look at some fundamentals about kafka’s log partiton</p>
-<p>There are four files under each kafka data directory(path config in <code>log.dirs</code>), in addition to the replica log data directory.</p>
-<ul>
-<li><code>cleaner-offset-checkpoint</code></li>
-<li><p><code>recovery-point-offset-checkpoint</code></p>
-<p>As its name suggests, this file is used when broker restart, initialize the internal state of <code>LogManager</code>. Each time broker flush log, current <code>LogEndOffset</code> will be written to the file.</p></li>
-<li><p><code>replication-offset-checkpoint</code></p>
-<p>This file records the high watermark of partitions. The high watermark is the offset of the last message that was successfully copied to all of the log’s replicas</p></li>
-<li><p><code>meta.properties</code> holds the version and id of broker</p></li>
-</ul>
-<p>Difference between Log end offset(LEO) and High Watermark(HW) is shown below. More details can be found <a href="http://www.confluent.io/blog/hands-free-kafka-replication-a-lesson-in-operational-simplicity/" target="_blank" rel="noopener">here</a>.</p>
-<p><img src="/img/move-kafka/mk-partition.png"></p>
-<h1 id="steps">Steps</h1>
-<p>Let’s take a look at one example</p>
-<pre><code> ~$ du -hd 1 /disk12/kafka-logs/
- 176G    /disk12/kafka-logs/midsource-fsrcproxy1-9
- 90G     /disk12/kafka-logs/dns-formated-log-48
- 270G    /disk12/kafka-logs/metrics-15
- ...</code></pre>
-<p>now we want to move partition <code>metrics-15</code> to another disk, for example <code>/disk7/kafka-logs</code></p>
-<h2 id="step-0-stop-the-broker">Step 0: Stop the broker</h2>
-<h2 id="step-1-migrating-meta-in-recovery-file">Step 1: Migrating meta in recovery file</h2>
-<pre><code>~$ cat /disk12/kafka-logs/recovery-point-offset-checkpoint
-0
-41
-...
-metrics 15 185980984
-...</code></pre>
-<p>Main format of this file is <code>&lt;topic&gt; &lt;partition id&gt; &lt;LogEndOffset&gt;</code>, find our target partition, cut the line, and paste the line into <code>/disk7/kafka-logs/recovery-point-offset-checkpoint</code></p>
-<p>The second line shows how many partition under this log data dir. After we move partition, it should be reduced by one, so we change it from <code>41</code> to <code>40</code>.</p>
-<p>At the same time the second line number in <code>/disk7/kafka-logs/recovery-point-offset-checkpoint</code> should be added one</p>
-<h2 id="step-2-migrating-meta-in-replica-offset-file">Step 2: Migrating meta in replica offset file</h2>
-<p>Similar to step 1, except that the file is changed to <code>replication-offset-checkpoint</code></p>
-<h2 id="step-3-move-partition-data">Step 3: Move partition data</h2>
-<pre><code>mv /disk12/kafka-logs/metrics-15 /disk7/kafka-logs/metrics-15</code></pre>
-<h2 id="step-4-restart-the-broker">Step 4: Restart the broker</h2>
+        <h1 id="概述">概述</h1>
+<p>衰减平均（Decaying Average）是一种简单的数学方法，用来计算一个数列的平均，核心是给近期的数据更高的权重，即强调近期数据对结果的影响。 衰减平均计算公式如下：</p>
+<p><span class="math display">\[ \begin{cases}
+davg_{n} = v_{n} &amp; \text{ if } n=1 \\ 
+davg_{n} = (1 - \alpha ) * v_{n} + \alpha * davg_{n-1} &amp; \text{ if } n &gt; 1 
+\end{cases} \]</span></p>
+<p>式中 <span class="math inline">\(\alpha\)</span> 为历史数据权值，<span class="math inline">\(1-\alpha\)</span> 为最近一次数据权值。即 <span class="math inline">\(\alpha\)</span> 越小，最近一次的数据对结果影响越大。 不难看出，其实传统的平均就是 <span class="math inline">\(\alpha\)</span> 取值为 <span class="math inline">\((n-1)/n\)</span> 的情况</p>
+<p><a id="more"></a></p>
+<p>同理，衰减方差的定义如下:</p>
+<p><span class="math display">\[ \begin{cases}
+dvar_{n} = 0 &amp; \text{ if } n=1 \\ 
+dvar_{n} = (1 - \alpha ) * (v_{n} - davg_{n})^{2} + \alpha * dvar_{n-1} &amp; \text{ if } n &gt; 1 
+\end{cases} \]</span></p>
+<p>我们用一组数据来演示下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">l = np.random.rand(<span class="number">20</span>)</span><br><span class="line">fig = plt.figure()</span><br><span class="line"><span class="keyword">for</span> alpha <span class="keyword">in</span> np.arange(<span class="number">0.1</span>, <span class="number">1</span>, <span class="number">0.1</span>):</span><br><span class="line">    plt.plot([reduce(<span class="keyword">lambda</span> x, y: x*alpha+y*(<span class="number">1</span>-alpha), l[:i]) <span class="keyword">for</span> i <span class="keyword">in</span> range (<span class="number">1</span>, len(l)+<span class="number">1</span>)], label=<span class="string">"alpha "</span>+str(alpha))</span><br><span class="line"></span><br><span class="line">plt.plot([l[:i].mean() <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(l)+<span class="number">1</span>) ], label=<span class="string">"avg"</span>, color=<span class="string">'red'</span>, linewidth=<span class="number">2</span>)</span><br><span class="line">plt.bar(range(len(l)),l)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>依次取 <span class="math inline">\(\alpha\)</span> 为 <code>0.1, 0.2 ... 0.9</code> 加上平均值一共 10 组数据，和原数据的直方图一起绘图如下</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/davg/davg.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>红色加粗的线为平均值，可见相对于衰减平均值来说，平均值更稳定。其余彩色线（衰减平均）都随着当前值波动，并且 <span class="math inline">\(\alpha\)</span> 取值越小波动越剧烈。</p>
+<p>引用 <a href="http://www.narihiro.info/g1gc-impl-book/scheduling.html" target="_blank" rel="noopener">徹底解剖「G1GC」実装編 - 予測とスケジューリング</a> 中的一张图，该图更加直观地说明了数列中每个值对衰减平均的影响。</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/davg/weight.png">
+<h1 id="应用">应用</h1>
+<p><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/g1_gc.html" target="_blank" rel="noopener">G1 垃圾收集器</a> 的停顿预测模型（pause prediction model）是基于衰减平均和衰减标准差建立的。</p>
+<p>java-1.8/hotspot/src/share/vm/utilities/numberSeq.cpp 36L-48L</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> AbsSeq::add(<span class="keyword">double</span> val) &#123;</span><br><span class="line">  <span class="keyword">if</span> (_num == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// if the sequence is empty, the davg is the same as the value</span></span><br><span class="line">    _davg = val;</span><br><span class="line">    <span class="comment">// and the variance is 0</span></span><br><span class="line">    _dvariance = <span class="number">0.0</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// otherwise, calculate both</span></span><br><span class="line">    _davg = (<span class="number">1.0</span> - _alpha) * val + _alpha * _davg;</span><br><span class="line">    <span class="keyword">double</span> diff = val - _davg;</span><br><span class="line">    _dvariance = (<span class="number">1.0</span> - _alpha) * diff * diff + _alpha * _dvariance;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>_davg</code> 为衰减均值， <code>_dvariance</code> 为衰减方差</p>
+<p>其中 <code>_alpha</code> 的默认值定义如下 java-1.8/hotspot/src/share/vm/utilities/numberSeq.hpp L43 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEFAULT_ALPHA_VALUE 0.7</span></span><br></pre></td></tr></table></figure></p>
+<p>G1 的预测逻辑就基于衰减平均值和衰减标准差，每次预测对历史序列执行以下函数即可</p>
+<p>java-1.8/hotspot/src/share/vm/gc_implementation/g1/g1CollectorPolicy.hpp <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">get_new_prediction</span><span class="params">(TruncatedSeq* seq)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> MAX2(seq-&gt;davg() + sigma() * seq-&gt;dsd(),</span><br><span class="line">              seq-&gt;davg() * confidence_factor(seq-&gt;num()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中, <code>MAX2</code>函数取两者最大。<code>davg()</code> 即序列的衰减平均值，<code>dsd()</code> 为衰减标准差。 <code>sigma()</code> 来自环境变量 <code>G1ConfidencePercent</code> 的配置，相关代码如下</p>
+<p>java-1.8/hotspot/src/share/vm/gc_implementation/g1/g1CollectorPolicy.hpp L265 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> _sigma;</span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">sigma</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _sigma; &#125;</span><br></pre></td></tr></table></figure></p>
+<p>java-1.8/hotspot/src/share/vm/gc_implementation/g1/g1CollectorPolicy.cpp L286 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">uintx confidence_perc = G1ConfidencePercent;</span><br><span class="line"><span class="comment">// Put an artificial ceiling on this so that it's not set to a silly value.</span></span><br><span class="line"><span class="keyword">if</span> (confidence_perc &gt; <span class="number">100</span>) &#123;</span><br><span class="line">  confidence_perc = <span class="number">100</span>;</span><br><span class="line">  warning(<span class="string">"G1ConfidencePercent is set to a value that is too large, "</span></span><br><span class="line">          <span class="string">"it's been updated to %u"</span>, confidence_perc);</span><br><span class="line">&#125;</span><br><span class="line">_sigma = (<span class="keyword">double</span>) confidence_perc / <span class="number">100.0</span>;</span><br></pre></td></tr></table></figure></p>
+<p><code>confidence_factor</code> 当数据不足时（小于5个）取一个大于1的值，并且数据越少值越大。当数据多余 5 个取值为1。一定程度上给数据不足起到补偿作用。</p>
+<p>java-1.8/hotspot/src/share/vm/gc_implementation/g1/g1CollectorPolicy.hpp <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A function that prevents us putting too much stock in small sample</span></span><br><span class="line"><span class="comment">// sets.  Returns a number between 2.0 and 1.0, depending on the number</span></span><br><span class="line"><span class="comment">// of samples.  5 or more samples yields one; fewer scales linearly from</span></span><br><span class="line"><span class="comment">// 2.0 at 1 sample to 1.0 at 5.</span></span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">confidence_factor</span><span class="params">(<span class="keyword">int</span> samples)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (samples &gt; <span class="number">4</span>) <span class="keyword">return</span> <span class="number">1.0</span>;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">return</span>  <span class="number">1.0</span> + sigma() * ((<span class="keyword">double</span>)(<span class="number">5</span> - samples))/<span class="number">2.0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其他方面，因为标准平均对最近数据敏感的特性，也在教育界被用在对学生技能掌握的评估上。</p>
 
       
     </div>
@@ -460,7 +456,9 @@ metrics 15 185980984
       
         <div class="post-tags">
           
-            <a href="/tags/kafka/" rel="tag"># kafka</a>
+            <a href="/tags/衰减平均/" rel="tag"># 衰减平均</a>
+          
+            <a href="/tags/G1/" rel="tag"># G1</a>
           
         </div>
       
@@ -473,8 +471,8 @@ metrics 15 185980984
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/一次写缓存优化的经历/" rel="next" title="记一次写磁盘的缓存优化">
-                <i class="fa fa-chevron-left"></i> 记一次写磁盘的缓存优化
+              <a href="/浅尝图像搜索/" rel="next" title="浅尝图像搜索">
+                <i class="fa fa-chevron-left"></i> 浅尝图像搜索
               </a>
             
           </div>
@@ -483,8 +481,8 @@ metrics 15 185980984
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/统计学习方法全部习题解答/" rel="prev" title="《统计学习方法》全部习题解答">
-                《统计学习方法》全部习题解答 <i class="fa fa-chevron-right"></i>
+              <a href="/be-careful-with-golang-embedded-error/" rel="prev" title="Be Careful with Embedded Error in Golang">
+                Be Careful with Embedded Error in Golang <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -666,7 +664,7 @@ metrics 15 185980984
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#fundamentals"><span class="nav-number">1.</span> <span class="nav-text">Fundamentals</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#steps"><span class="nav-number">2.</span> <span class="nav-text">Steps</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#step-0-stop-the-broker"><span class="nav-number">2.1.</span> <span class="nav-text">Step 0: Stop the broker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-1-migrating-meta-in-recovery-file"><span class="nav-number">2.2.</span> <span class="nav-text">Step 1: Migrating meta in recovery file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-2-migrating-meta-in-replica-offset-file"><span class="nav-number">2.3.</span> <span class="nav-text">Step 2: Migrating meta in replica offset file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-3-move-partition-data"><span class="nav-number">2.4.</span> <span class="nav-text">Step 3: Move partition data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-4-restart-the-broker"><span class="nav-number">2.5.</span> <span class="nav-text">Step 4: Restart the broker</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">2.</span> <span class="nav-text">应用</span></a></li></ol></div>
             
 
           </div>
@@ -844,7 +842,7 @@ metrics 15 185980984
 		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
 		
-		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "move-kafka-partitons-between-disks/"});
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "衰减平均与衰减标准差/"});
 		
 
 		(function() {
@@ -904,6 +902,26 @@ metrics 15 185980984
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 

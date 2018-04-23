@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="kafka," />
+  <meta name="keywords" content="cache," />
 
 
 
@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
-<meta name="keywords" content="kafka">
+<meta name="description" content="半年来，一个我维护的系统一直在持续更新迭代，业务推手来自自建的CDN上量很快，短短半年初具规模，记录下历程总结回顾 业务场景 有大量的域名访问日志从 kafka 收集过来，需要对其消费写入本地文件中，文件需按域名拆分，即一个域名一个文件。 问题规模 - kafka 输入在 60万 QPS （未来还会持续增加） - 每行访问日志大小约 200 - 800 Byte 不等">
+<meta name="keywords" content="cache">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Moving Kafka Replica Between Disk">
-<meta property="og:url" content="http://simonxia.com/move-kafka-partitons-between-disks/index.html">
+<meta property="og:title" content="记一次写磁盘的缓存优化">
+<meta property="og:url" content="http://simonxia.com/一次写缓存优化的经历/index.html">
 <meta property="og:site_name" content="Simon Xia">
-<meta property="og:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
+<meta property="og:description" content="半年来，一个我维护的系统一直在持续更新迭代，业务推手来自自建的CDN上量很快，短短半年初具规模，记录下历程总结回顾 业务场景 有大量的域名访问日志从 kafka 收集过来，需要对其消费写入本地文件中，文件需按域名拆分，即一个域名一个文件。 问题规模 - kafka 输入在 60万 QPS （未来还会持续增加） - 每行访问日志大小约 200 - 800 Byte 不等">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
-<meta property="og:updated_time" content="2018-04-22T08:20:06.000Z">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/一次写缓存优化的经历/log_spliter.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-05-26T23:47:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Moving Kafka Replica Between Disk">
-<meta name="twitter:description" content="As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is f">
-<meta name="twitter:image" content="http://simonxia.com/img/move-kafka/mk-partition.png">
+<meta name="twitter:title" content="记一次写磁盘的缓存优化">
+<meta name="twitter:description" content="半年来，一个我维护的系统一直在持续更新迭代，业务推手来自自建的CDN上量很快，短短半年初具规模，记录下历程总结回顾 业务场景 有大量的域名访问日志从 kafka 收集过来，需要对其消费写入本地文件中，文件需按域名拆分，即一个域名一个文件。 问题规模 - kafka 输入在 60万 QPS （未来还会持续增加） - 每行访问日志大小约 200 - 800 Byte 不等">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/一次写缓存优化的经历/log_spliter.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
 
 
 
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://simonxia.com/move-kafka-partitons-between-disks/"/>
+  <link rel="canonical" href="http://simonxia.com/一次写缓存优化的经历/"/>
 
 
 
 
 
-  <title>Moving Kafka Replica Between Disk | Simon Xia</title>
+  <title>记一次写磁盘的缓存优化 | Simon Xia</title>
   
 
 
@@ -303,7 +303,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://simonxia.com/move-kafka-partitons-between-disks/">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/一次写缓存优化的经历/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Simon Xia">
@@ -320,7 +320,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Moving Kafka Replica Between Disk</h2>
+          <h2 class="post-title" itemprop="name headline">记一次写磁盘的缓存优化</h2>
         
 
         <div class="post-meta">
@@ -332,8 +332,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-27T15:30:26+08:00">
-                2016-12-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-05T12:40:02+08:00">
+                2016-12-05
               </time>
             
 
@@ -355,8 +355,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/infra/" itemprop="url" rel="index">
-                    <span itemprop="name">infra</span>
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
                   </a>
                 </span>
 
@@ -374,8 +374,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/move-kafka-partitons-between-disks/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="move-kafka-partitons-between-disks/" itemprop="commentsCount"></span>
+                <a href="/一次写缓存优化的经历/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="一次写缓存优化的经历/" itemprop="commentsCount"></span>
                 </a>
               </span>
               <!--/noindex-->
@@ -404,45 +404,49 @@
       
 
       
-        <p>As we know, one Kafka partition replica resides under one directory. When the replica size grows, the directory maybe reach the limit of disk. And Kafka can’t handle this automatically, when disk is full, IOException occurs.</p>
+        <p>半年来，一个我维护的系统一直在持续更新迭代，业务推手来自自建的CDN上量很快，短短半年初具规模，记录下历程总结回顾</p>
+<h1 id="业务场景">业务场景</h1>
+<p>有大量的域名访问日志从 kafka 收集过来，需要对其消费写入本地文件中，文件需按域名拆分，即一个域名一个文件。</p>
+<p>问题规模 - kafka 输入在 60万 QPS （未来还会持续增加） - 每行访问日志大小约 200 - 800 Byte 不等</p>
 <a id="more"></a>
-<h1 id="fundamentals">Fundamentals</h1>
-<p>So we have to do this by hand. Before we start, let’s take a look at some fundamentals about kafka’s log partiton</p>
-<p>There are four files under each kafka data directory(path config in <code>log.dirs</code>), in addition to the replica log data directory.</p>
+<h1 id="v1.0">v1.0</h1>
+<p>最开始域名数量比较少，在千级别，只有一些重点客户有此需求。所以我们维护了一堆呈打开状态文件的 fd，每消费出一条消息，就将其写到对应的文件的 fd 中。此方法简单粗暴，效果良好。</p>
+<h1 id="v2.0">v2.0</h1>
+<p>随着服务发展，域名数量开始增多。这种维护打开 fd 的方式很快会到达系统 fd 打开的上限。一种比较平滑的解决方法是对域名做哈希运算，将哈希相同的域名写到一个文件里，再定时对文件按域名切分。这会引入额外的工作步骤，直观的解决办法是增加缓存，将消费日志数据与落地磁盘两个过程解耦: <em>将消费出的日志在内存中按域名聚合，再定期刷写到磁盘中</em></p>
+<p>具体地说，在内存中维护一个哈希表，以域名为 key， 日志内容为 value 用 go 定义结构即为 map[string][]byte ，相同域名的日志聚合到一个 []byte 字节数组中。然后每隔一段时间，把这个哈希表写到磁盘中，每个key对应一个域名的文件，可以以key为粒度并发进行。</p>
+<p>整个系统结构如下</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/一次写缓存优化的经历/log_spliter.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>针对某个 kafka topic，对每个 partition 启动一个 partition consumer 进程，每个进程中维护一个小哈希表 snap，定时将所有 snap 发送到管道 snapChannel，在管道另一端，一个进程合并一批 snap 为一个大哈希表 mergedSnap，再异步将 mergedSnap 写到磁盘上，每个key一个文件。</p>
+<p>整个程序内存占用为： (parition数量+snapChannel大小)*snap大小+mergedSnap大小</p>
+<p>通过 partition consumer 步骤的消费时长能控制 snap 大小，通过控制 snapChannel 大小可以控制缓存的 snap 数量，如果磁盘写入性能收到影响，通过 snapChannel 可以反压消费端（步骤 push 写入snapChannel为同步）。因此，整个系统内存占用可控.</p>
+<h1 id="v3.0">v3.0</h1>
+<p>随着业务继续增加，v2.0的缺点开始暴露出来。 业务增长直接影响体现在 QPS 增加和域名数量增加（约 20 万）</p>
+<p>因为每个域名的日志量不同，并且倾斜明显，基本遵循二八原则即 20%的域名产生了80%的日志，这就使得哈希表中的value分布倾斜。直接后果就是在刷写磁盘时，几个大域名的文件成了长尾。 同时，域名数量增加也带来写文件数量的增加，一次刷写磁盘周期显著变长。</p>
+<p>针对哈希表倾斜，可以将刷写磁盘的步骤拆解为更小的粒度。即把以前一次刷写一张表，改为以key为单位刷写磁盘。同时，刷盘粒度减小后，一个大周期的写盘被分散到若干小周期中。 一些可选策略如下 1. 对value 大的key提高刷盘频率 2. 对哈希表中 value 大小 top 一定百分比的key统一刷盘 3. 对每个 key 累积到一定大小单独刷盘 4. 定时对一些 value 小的 key 统一刷盘 5. 表中的 key 距离上次被刷新时间超过一定阈值</p>
+<p>实际实现时采取<em>定时检查，选择刷盘</em>的策略，为 v2.0 中的 mergedSnap 增加更多具体元信息，周期性地对其检查。</p>
+<p>设置两个阈值：</p>
+<ol type="1">
+<li>每个key的大小阈值 maxKeySize</li>
+<li>强制刷新间隔 forceFlushDuration</li>
+</ol>
+<p>策略：</p>
+<ol type="1">
+<li>对 value 大于 maxKeySize 的 key 触发刷盘</li>
+<li>对 value 小于 maxKeySize 的 key，如果距离上次刷盘时间间隔大于 forceFlushDuration, 触发刷盘</li>
+</ol>
+<p>为了避免整个哈希表内存占用过高，当整个哈希表大小到一定阈值时，触发刷盘。</p>
+<p>其他优化</p>
 <ul>
-<li><code>cleaner-offset-checkpoint</code></li>
-<li><p><code>recovery-point-offset-checkpoint</code></p>
-<p>As its name suggests, this file is used when broker restart, initialize the internal state of <code>LogManager</code>. Each time broker flush log, current <code>LogEndOffset</code> will be written to the file.</p></li>
-<li><p><code>replication-offset-checkpoint</code></p>
-<p>This file records the high watermark of partitions. The high watermark is the offset of the last message that was successfully copied to all of the log’s replicas</p></li>
-<li><p><code>meta.properties</code> holds the version and id of broker</p></li>
+<li>利用zfs将多个磁盘合并，减少磁盘空间使用不均的同时提高磁盘io利用率</li>
+<li>在 merge 时利用 gzip 压缩节省空间，直接以 gzip 的方式落到磁盘上</li>
 </ul>
-<p>Difference between Log end offset(LEO) and High Watermark(HW) is shown below. More details can be found <a href="http://www.confluent.io/blog/hands-free-kafka-replication-a-lesson-in-operational-simplicity/" target="_blank" rel="noopener">here</a>.</p>
-<p><img src="/img/move-kafka/mk-partition.png"></p>
-<h1 id="steps">Steps</h1>
-<p>Let’s take a look at one example</p>
-<pre><code> ~$ du -hd 1 /disk12/kafka-logs/
- 176G    /disk12/kafka-logs/midsource-fsrcproxy1-9
- 90G     /disk12/kafka-logs/dns-formated-log-48
- 270G    /disk12/kafka-logs/metrics-15
- ...</code></pre>
-<p>now we want to move partition <code>metrics-15</code> to another disk, for example <code>/disk7/kafka-logs</code></p>
-<h2 id="step-0-stop-the-broker">Step 0: Stop the broker</h2>
-<h2 id="step-1-migrating-meta-in-recovery-file">Step 1: Migrating meta in recovery file</h2>
-<pre><code>~$ cat /disk12/kafka-logs/recovery-point-offset-checkpoint
-0
-41
-...
-metrics 15 185980984
-...</code></pre>
-<p>Main format of this file is <code>&lt;topic&gt; &lt;partition id&gt; &lt;LogEndOffset&gt;</code>, find our target partition, cut the line, and paste the line into <code>/disk7/kafka-logs/recovery-point-offset-checkpoint</code></p>
-<p>The second line shows how many partition under this log data dir. After we move partition, it should be reduced by one, so we change it from <code>41</code> to <code>40</code>.</p>
-<p>At the same time the second line number in <code>/disk7/kafka-logs/recovery-point-offset-checkpoint</code> should be added one</p>
-<h2 id="step-2-migrating-meta-in-replica-offset-file">Step 2: Migrating meta in replica offset file</h2>
-<p>Similar to step 1, except that the file is changed to <code>replication-offset-checkpoint</code></p>
-<h2 id="step-3-move-partition-data">Step 3: Move partition data</h2>
-<pre><code>mv /disk12/kafka-logs/metrics-15 /disk7/kafka-logs/metrics-15</code></pre>
-<h2 id="step-4-restart-the-broker">Step 4: Restart the broker</h2>
+<h1 id="总结">总结</h1>
+<p>总的说来，针对写磁盘的缓存，解决此问题的核心思路围绕以下几点展开</p>
+<ol type="1">
+<li>把大量文件的随机写转化为少量文件的顺序写</li>
+<li>把少量频繁的写入合并为批量单次的写入</li>
+<li>对低频更新的数据，设置超时或大小阈值触发写入</li>
+</ol>
 
       
     </div>
@@ -460,7 +464,7 @@ metrics 15 185980984
       
         <div class="post-tags">
           
-            <a href="/tags/kafka/" rel="tag"># kafka</a>
+            <a href="/tags/cache/" rel="tag"># cache</a>
           
         </div>
       
@@ -473,8 +477,8 @@ metrics 15 185980984
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/一次写缓存优化的经历/" rel="next" title="记一次写磁盘的缓存优化">
-                <i class="fa fa-chevron-left"></i> 记一次写磁盘的缓存优化
+              <a href="/be-careful-with-golang-embedded-error/" rel="next" title="Be Careful with Embedded Error in Golang">
+                <i class="fa fa-chevron-left"></i> Be Careful with Embedded Error in Golang
               </a>
             
           </div>
@@ -483,8 +487,8 @@ metrics 15 185980984
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/统计学习方法全部习题解答/" rel="prev" title="《统计学习方法》全部习题解答">
-                《统计学习方法》全部习题解答 <i class="fa fa-chevron-right"></i>
+              <a href="/move-kafka-partitons-between-disks/" rel="prev" title="Moving Kafka Replica Between Disk">
+                Moving Kafka Replica Between Disk <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -666,7 +670,7 @@ metrics 15 185980984
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#fundamentals"><span class="nav-number">1.</span> <span class="nav-text">Fundamentals</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#steps"><span class="nav-number">2.</span> <span class="nav-text">Steps</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#step-0-stop-the-broker"><span class="nav-number">2.1.</span> <span class="nav-text">Step 0: Stop the broker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-1-migrating-meta-in-recovery-file"><span class="nav-number">2.2.</span> <span class="nav-text">Step 1: Migrating meta in recovery file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-2-migrating-meta-in-replica-offset-file"><span class="nav-number">2.3.</span> <span class="nav-text">Step 2: Migrating meta in replica offset file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-3-move-partition-data"><span class="nav-number">2.4.</span> <span class="nav-text">Step 3: Move partition data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-4-restart-the-broker"><span class="nav-number">2.5.</span> <span class="nav-text">Step 4: Restart the broker</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#业务场景"><span class="nav-number">1.</span> <span class="nav-text">业务场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#v1.0"><span class="nav-number">2.</span> <span class="nav-text">v1.0</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#v2.0"><span class="nav-number">3.</span> <span class="nav-text">v2.0</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#v3.0"><span class="nav-number">4.</span> <span class="nav-text">v3.0</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
@@ -844,7 +848,7 @@ metrics 15 185980984
 		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
 		
-		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "move-kafka-partitons-between-disks/"});
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "一次写缓存优化的经历/"});
 		
 
 		(function() {

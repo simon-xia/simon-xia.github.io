@@ -984,7 +984,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/统计学习方法全部习题解答/" itemprop="url">统计学习方法全部习题解答</a></h2>
+                <a class="post-title-link" href="/统计学习方法全部习题解答/" itemprop="url">《统计学习方法》全部习题解答</a></h2>
         
 
         <div class="post-meta">
@@ -1006,6 +1006,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -1053,6 +1075,7 @@
 <blockquote>
 <p>说明伯努利模型的极大似然估计以及贝叶斯估计中的统计学习方法三要素</p>
 </blockquote>
+<h3 id="努利模型的极大似然估计">1.1.1 努利模型的极大似然估计</h3>
 <p>设 <span class="math inline">\(X \sim b(1, p)\)</span>, 则 <span class="math inline">\(X\)</span> 的分布律为</p>
 <p><span class="math display">\[
 P\{X=x\} = p^{x}(1-p)^{1-x},  \ \ \ \  x = 0, 1
@@ -1285,6 +1308,167 @@ L(p) = \prod_{i = 1}^{n}p^{x_{i}}(1-p)^{1-x_{i}} = p^{\sum_{i=1}^{n}x_{i}}(1-p)^
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/一次写缓存优化的经历/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/一次写缓存优化的经历/" itemprop="url">记一次写磁盘的缓存优化</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-05T12:40:02+08:00">
+                2016-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/一次写缓存优化的经历/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="一次写缓存优化的经历/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>半年来，一个我维护的系统一直在持续更新迭代，业务推手来自自建的CDN上量很快，短短半年初具规模，记录下历程总结回顾</p>
+<h1 id="业务场景">业务场景</h1>
+<p>有大量的域名访问日志从 kafka 收集过来，需要对其消费写入本地文件中，文件需按域名拆分，即一个域名一个文件。</p>
+<p>问题规模 - kafka 输入在 60万 QPS （未来还会持续增加） - 每行访问日志大小约 200 - 800 Byte 不等</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/一次写缓存优化的经历/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://simonxia.com/be-careful-with-golang-embedded-error/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1400,6 +1584,171 @@ L(p) = \prod_{i = 1}^{n}p^{x_{i}}(1-p)^{1-x_{i}} = p^{\sum_{i=1}^{n}x_{i}}(1-p)^
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/be-careful-with-golang-embedded-error/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/衰减平均与衰减标准差/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/衰减平均与衰减标准差/" itemprop="url">衰减平均与衰减标准差</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-14T20:20:04+08:00">
+                2016-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/衰减平均与衰减标准差/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="衰减平均与衰减标准差/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="概述">概述</h1>
+<p>衰减平均（Decaying Average）是一种简单的数学方法，用来计算一个数列的平均，核心是给近期的数据更高的权重，即强调近期数据对结果的影响。 衰减平均计算公式如下：</p>
+<p><span class="math display">\[ \begin{cases}
+davg_{n} = v_{n} &amp; \text{ if } n=1 \\ 
+davg_{n} = (1 - \alpha ) * v_{n} + \alpha * davg_{n-1} &amp; \text{ if } n &gt; 1 
+\end{cases} \]</span></p>
+<p>式中 <span class="math inline">\(\alpha\)</span> 为历史数据权值，<span class="math inline">\(1-\alpha\)</span> 为最近一次数据权值。即 <span class="math inline">\(\alpha\)</span> 越小，最近一次的数据对结果影响越大。 不难看出，其实传统的平均就是 <span class="math inline">\(\alpha\)</span> 取值为 <span class="math inline">\((n-1)/n\)</span> 的情况</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/衰减平均与衰减标准差/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1609,361 +1958,6 @@ L(p) = \prod_{i = 1}^{n}p^{x_{i}}(1-p)^{1-x_{i}} = p^{\sum_{i=1}^{n}x_{i}}(1-p)^
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://simonxia.com/抢购demo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Simon Xia">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Simon Xia">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/抢购demo/" itemprop="url">一个小型抢购系统demo——饿了么大学生黑客马拉松小结</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-02T14:30:00+08:00">
-                2015-12-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/programming/" itemprop="url" rel="index">
-                    <span itemprop="name">programming</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/抢购demo/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="抢购demo/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="题目内容">题目内容</h1>
-<p>简单地说就是，实现给定的api并尽可能地提高并发量。</p>
-<p>具体规则详见官网：<a href="http://hackathon.ele.me/intro#intro-general" target="_blank" rel="noopener">饿了么全国大学生黑客马拉松</a></p>
-<h1 id="初步设计">初步设计</h1>
-<p>redis 存储 按照业务逻辑拆分为4个库，各司其职，分别如下：</p>
-<table>
-<thead>
-<tr class="header">
-<th>Db name</th>
-<th>Key type</th>
-<th>Key</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>accessTokenDb</td>
-<td>k-v</td>
-<td>accessToken</td>
-</tr>
-<tr class="even">
-<td>cartDb</td>
-<td>hash</td>
-<td>cartid</td>
-</tr>
-<tr class="odd">
-<td>orderDb</td>
-<td>hash</td>
-<td>accessToken</td>
-</tr>
-<tr class="even">
-<td>hasorderedset</td>
-<td>set</td>
-<td>-</td>
-</tr>
-</tbody>
-</table>
-<p>登陆 accessTokenDb 创建和添加购物车 cartDb 下单 orderDb 判断下单唯一性 set</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/抢购demo/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://simonxia.com/HTTP2-前瞻/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Simon Xia">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Simon Xia">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/HTTP2-前瞻/" itemprop="url">HTTP2 前瞻</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-03-22T15:30:26+08:00">
-                2015-03-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/network/" itemprop="url" rel="index">
-                    <span itemprop="name">network</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/HTTP2-前瞻/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="HTTP2-前瞻/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>这两天和<a href="http://www.zhihu.com/people/ye-lou-jiang" target="_blank" rel="noopener">液漏酱</a>同学一起翻译<a href="http://daniel.haxx.se/" target="_blank" rel="noopener">Daniel Stenberg</a>的<a href="http://daniel.haxx.se/http2/" target="_blank" rel="noopener">http2 explained</a> ，发现http2有很多让人期待的特性，本文在此做一个简单介绍。</p>
-<p>前天正好是Daniel代表作curl的<a href="http://daniel.haxx.se/blog/2015/03/20/curl-17-years-old-today/" target="_blank" rel="noopener">17岁生日</a>，在此祝这位HTTP协议界的前辈生日快乐！ XD</p>
-<h1 id="二进制">二进制</h1>
-<p>http2将全面启用二进制，主要有以下两大优势：</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/HTTP2-前瞻/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2018,7 +2012,7 @@ L(p) = \prod_{i = 1}^{n}p^{x_{i}}(1-p)^{1-x_{i}} = p^{\sum_{i=1}^{n}x_{i}}(1-p)^
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2040,7 +2034,7 @@ L(p) = \prod_{i = 1}^{n}p^{x_{i}}(1-p)^{1-x_{i}} = p^{\sum_{i=1}^{n}x_{i}}(1-p)^
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

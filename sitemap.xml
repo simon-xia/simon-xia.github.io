@@ -2,16 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://simonxia.com/move-kafka-partitons-between-disks/</loc>
+    <loc>http://simonxia.com/%E8%A1%B0%E5%87%8F%E5%B9%B3%E5%9D%87%E4%B8%8E%E8%A1%B0%E5%87%8F%E6%A0%87%E5%87%86%E5%B7%AE/</loc>
     
-    <lastmod>2018-04-22T08:20:06.000Z</lastmod>
+    <lastmod>2018-05-26T23:51:57.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://simonxia.com/%E4%B8%80%E6%AC%A1%E5%86%99%E7%BC%93%E5%AD%98%E4%BC%98%E5%8C%96%E7%9A%84%E7%BB%8F%E5%8E%86/</loc>
+    
+    <lastmod>2018-05-26T23:47:55.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://simonxia.com/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E5%85%A8%E9%83%A8%E4%B9%A0%E9%A2%98%E8%A7%A3%E7%AD%94/</loc>
     
-    <lastmod>2018-04-18T13:52:16.000Z</lastmod>
+    <lastmod>2018-05-26T16:46:38.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://simonxia.com/move-kafka-partitons-between-disks/</loc>
+    
+    <lastmod>2018-04-22T08:20:06.000Z</lastmod>
     
   </url>
   
