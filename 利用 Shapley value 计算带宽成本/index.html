@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Shapley Value,带宽成本," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="沙普利值法(Shapley Value) 是一种团队贡献度计算方法，经常被用于需要公平地分配合作收益的场景。其公式如下 \[ \phi_{i}(v) = \sum_{S \subseteq N \setminus \{i\}} \frac{\left | S \right |!(|N|-|S|-1)!}{|N|!}(v(S \bigcup \{i\}) - v(S)) \] 它的核心是计算每个成员">
+<meta name="keywords" content="Shapley Value,带宽成本">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 Shapley Value 计算带宽成本">
+<meta property="og:url" content="http://simonxia.com/利用 Shapley value 计算带宽成本/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="沙普利值法(Shapley Value) 是一种团队贡献度计算方法，经常被用于需要公平地分配合作收益的场景。其公式如下 \[ \phi_{i}(v) = \sum_{S \subseteq N \setminus \{i\}} \frac{\left | S \right |!(|N|-|S|-1)!}{|N|!}(v(S \bigcup \{i\}) - v(S)) \] 它的核心是计算每个成员">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain1.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain2.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain3.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain1-2-3.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-06-20T10:34:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用 Shapley Value 计算带宽成本">
+<meta name="twitter:description" content="沙普利值法(Shapley Value) 是一种团队贡献度计算方法，经常被用于需要公平地分配合作收益的场景。其公式如下 \[ \phi_{i}(v) = \sum_{S \subseteq N \setminus \{i\}} \frac{\left | S \right |!(|N|-|S|-1)!}{|N|!}(v(S \bigcup \{i\}) - v(S)) \] 它的核心是计算每个成员">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain1.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/利用 Shapley value 计算带宽成本/"/>
+
+
+
+
+
+  <title>利用 Shapley Value 计算带宽成本 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/利用 Shapley value 计算带宽成本/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">利用 Shapley Value 计算带宽成本</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-02-10T20:18:45+08:00">
+                2017-02-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/利用 Shapley value 计算带宽成本/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="利用 Shapley value 计算带宽成本/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a href="https://en.wikipedia.org/wiki/Shapley_value" target="_blank" rel="noopener">沙普利值法(Shapley Value)</a> 是一种团队贡献度计算方法，经常被用于需要公平地分配合作收益的场景。其公式如下</p>
+<p><span class="math display">\[
+\phi_{i}(v) = \sum_{S \subseteq N \setminus \{i\}} \frac{\left | S \right |!(|N|-|S|-1)!}{|N|!}(v(S \bigcup \{i\}) - v(S))
+\]</span></p>
+<p>它的核心是计算每个成员在所有成员组合中的边际贡献的期望。边际贡献即为式中的:</p>
+<p><span class="math display">\[
+\delta _{i}(S) = v(S \bigcup \{i\}) - v(S)
+\]</span></p>
+<h1 id="在带宽成本中的应用">在带宽成本中的应用</h1>
+<p>在实际的带宽用量计算中通常以一段时间的 95 峰值（95分位值，业内对带宽计算的事实标准）为准。当存在一批域名时，由于每个域名的流量分布不同，95峰不同，域名流量叠加后的 95 峰就不等于所有域名95峰的简单计算。举个例子，有三个域名，他们的带宽分布分别如下</p>
+<p>domain1</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain1.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<a id="more"></a>
+<p>domain2</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain2.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>domain3</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain3.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>三个域名叠加后</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/利用Shapley-value计算带宽成本/domain1-2-3.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<p>可见，三域名的带宽图叠加之后，带宽分布发生变化，95峰值也随之改变。 如果叠加之后的 95 峰记为 <span class="math inline">\(v95_{total}\)</span>，三个域名的 95 峰分别记为 <span class="math inline">\(v95_{1}\)</span>,<span class="math inline">\(v95_{2}\)</span>,<span class="math inline">\(v95_{3}\)</span>，怎么计算三者在总量中的比例呢？此时沙普利值法就发挥作用了。</p>
+<p>带入实际数据，举个例子</p>
+<table>
+<thead>
+<tr class="header">
+<th>组合</th>
+<th>95 峰 (Mbps)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>domain1</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td>domain2</td>
+<td>200</td>
+</tr>
+<tr class="odd">
+<td>domain3</td>
+<td>300</td>
+</tr>
+<tr class="even">
+<td>domain1, domain2</td>
+<td>250</td>
+</tr>
+<tr class="odd">
+<td>domain3, domain2</td>
+<td>400</td>
+</tr>
+<tr class="even">
+<td>domain3, domain1</td>
+<td>350</td>
+</tr>
+<tr class="odd">
+<td>domain3, domain2, domain1</td>
+<td>500</td>
+</tr>
+</tbody>
+</table>
+<p>表格的前三列是每个域名单独的 95 峰值，接下来三列是他们两两组合后的 95 峰值，最后一列是三者相加的 95 峰值。</p>
+<p>分别计算边际贡献</p>
+<table>
+<thead>
+<tr class="header">
+<th>排列</th>
+<th>domain1</th>
+<th>domain2</th>
+<th>domain3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1,2,3</td>
+<td>S(1) = 100</td>
+<td>S(1,2) - S(1) = 150</td>
+<td>S(1,2,3) - S(1,2) = 250</td>
+</tr>
+<tr class="even">
+<td>1,3,2</td>
+<td>S(1) = 100</td>
+<td>S(1,2,3) - S(1,3) = 150</td>
+<td>S(1,3) - S(1) = 250</td>
+</tr>
+<tr class="odd">
+<td>2,1,3</td>
+<td>S(1,2) - S(2) = 50</td>
+<td>S(2) = 200</td>
+<td>S(1,2,3) - S(1,2) = 250</td>
+</tr>
+<tr class="even">
+<td>2,3,1</td>
+<td>S(1,2,3) - S(3,2) = 100</td>
+<td>S(2) = 200</td>
+<td>S(3,2) - S(2) = 200</td>
+</tr>
+<tr class="odd">
+<td>3,1,2</td>
+<td>S(3,1) - S(3) = 50</td>
+<td>S(1,2,3) - S(3,1) = 150</td>
+<td>S(3) = 300</td>
+</tr>
+<tr class="even">
+<td>3,2,1</td>
+<td>S(1,2,3) - S(3,2) = 100</td>
+<td>S(3,2) - S(3) = 100</td>
+<td>S(3) = 300</td>
+</tr>
+</tbody>
+</table>
+<p>则三个域名对总带宽 95 峰的贡献分别是</p>
+<table>
+<thead>
+<tr class="header">
+<th>域名</th>
+<th>贡献</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>domain1</td>
+<td>1/6 * (100+100+50+100+50+100) = 83.33</td>
+</tr>
+<tr class="even">
+<td>domain2</td>
+<td>1/6 * (150+150+200+200+150+100) = 158.33</td>
+</tr>
+<tr class="odd">
+<td>domain3</td>
+<td>1/6 * (250+250+250+200+300+300) = 258.33</td>
+</tr>
+</tbody>
+</table>
+<h1 id="针对带宽成本中的简化">针对带宽成本中的简化</h1>
+<p>前面的例子中，域名数量为三，如果更多呢？显然边际贡献的计算量会急剧增加，与 N! 成正比。</p>
+<p>从沙普利值的公式也可以证实该计算复杂度是 O(N)。我们的域名数量非常多达百万，这个复杂度显然是不可接受的。</p>
+<p>由于域名带宽的特殊性， 对于不同域名的带宽叠加，他们的 95 峰值呈现如下关系:</p>
+<p><span class="math inline">\(max(v95_{i} + v95_{j}) &lt;= v95_{total} &lt;= v95_{i} + v95_{j}\)</span></p>
+<p>即两域名带宽叠加，叠加后的 95 峰值不会小于两者最大值，也不会大于两者之和。</p>
+<p>考虑到这种贡献的单增性，我们对沙普利值法做简化，将 N! 替换为 2！可以理解为把整个带宽的贡献分成两部分，一部分是当前域名产生的，另一部分是除开当前域名其他域名产生的。</p>
+<p>还是以上面的例子为例</p>
+<table>
+<thead>
+<tr class="header">
+<th>排列</th>
+<th>domain1</th>
+<th>domain2</th>
+<th>domain3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1,other</td>
+<td>S(1) = 100</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>other,1</td>
+<td>S(1,2,3) - S(2,3) = 100</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>2,other</td>
+<td>-</td>
+<td>S(2) = 200</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>other,2</td>
+<td>-</td>
+<td>S(1,2,3) - S(1,3) = 150</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>3,other</td>
+<td>-</td>
+<td>-</td>
+<td>S(3) = 300</td>
+</tr>
+<tr class="even">
+<td>other,3</td>
+<td>-</td>
+<td>-</td>
+<td>S(1,2,3) - S(1,2) = 250</td>
+</tr>
+</tbody>
+</table>
+<p>简化公式后，三个域名对 95 峰的贡献分别为</p>
+<table>
+<thead>
+<tr class="header">
+<th>域名</th>
+<th>贡献</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>domain1</td>
+<td>1/2 * (100+100) = 100</td>
+</tr>
+<tr class="even">
+<td>domain2</td>
+<td>1/2 * (150+200) = 175</td>
+</tr>
+<tr class="odd">
+<td>domain3</td>
+<td>1/2 * (250+300) = 275</td>
+</tr>
+</tbody>
+</table>
+<p>由于简化后总和大于原三者 95 峰，统一归一化： domain1: 100/(100+175+275)<em>500 = 90.91 domain2: 175/(100+175+275)</em>500 = 159.09 domain2: 275/(100+175+275)*500 = 250</p>
+<p>对比简化前后，误差出入在可接收范围内，但计算复杂度从 O(N!) 降低到了 O(N)，在我们场景 N 为百万量级时，优势非常明显</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Shapley-Value/" rel="tag"># Shapley Value</a>
+          
+            <a href="/tags/带宽成本/" rel="tag"># 带宽成本</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/move-kafka-partitons-between-disks/" rel="next" title="Moving Kafka Replica Between Disk">
+                <i class="fa fa-chevron-left"></i> Moving Kafka Replica Between Disk
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/统计学习方法全部习题解答/" rel="prev" title="《统计学习方法》全部习题解答">
+                《统计学习方法》全部习题解答 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#在带宽成本中的应用"><span class="nav-number">1.</span> <span class="nav-text">在带宽成本中的应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#针对带宽成本中的简化"><span class="nav-number">2.</span> <span class="nav-text">针对带宽成本中的简化</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "利用 Shapley value 计算带宽成本/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

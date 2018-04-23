@@ -90,7 +90,7 @@
 <meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/2.2_plot.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
 <meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/conv_overview.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
 <meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/统计学习方法全部习题解答/conv_triangle.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
-<meta property="og:updated_time" content="2018-05-26T16:46:38.000Z">
+<meta property="og:updated_time" content="2018-06-14T00:29:10.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="《统计学习方法》全部习题解答">
 <meta name="twitter:description" content="最近着手做一个流量预测方面的东西，重新刷一遍蓝皮书巩固下基础知识。 第一章 概论 1.1  说明伯努利模型的极大似然估计以及贝叶斯估计中的统计学习方法三要素  1.1.1 努利模型的极大似然估计 设 \(X \sim b(1, p)\), 则 \(X\) 的分布律为 \[ P\{X=x\} = p^{x}(1-p)^{1-x},  \ \ \ \  x = 0, 1 \] 假设 \(x_{1},">
@@ -676,6 +676,45 @@ g_{R}(D,A_{4}) = \frac{0.363}{1.565} = 0.232
 </blockquote>
 <p>反证法，假设最小子树不唯一，记为 <span class="math inline">\(T_{a}, T_{b}\)</span>，则他们对应的损失函数相等，且均取到最小值，记为 <span class="math inline">\(min(C_{\alpha} (T)) = C_{\alpha} (T_{a}) = C_{\alpha} (T_{b})\)</span></p>
 <p>如果将 <span class="math inline">\(T_{a}, T_{b}\)</span> 不同的部分记为 <span class="math inline">\(T&#39;_{a}, T&#39;_{b}\)</span>，如果在 <span class="math inline">\(T_{b}\)</span> 中用 <span class="math inline">\(T&#39;_{a}\)</span> 代替，则由最小子树定义，<span class="math inline">\(T_{b}\)</span> 的损失函数进一步减小，与 <span class="math inline">\(T_{b}\)</span> 是最小子树矛盾.</p>
+<h1 id="第六章-逻辑斯蒂回归与最大熵">第六章 逻辑斯蒂回归与最大熵</h1>
+<h2 id="section-12">6.1</h2>
+<blockquote>
+<p>确认逻辑斯谛分布属于指数分布族</p>
+</blockquote>
+<p>指数分布族具有如下形式</p>
+<p><span class="math display">\[
+f_{X}(x|\theta) = h(x)exp(\eta(\theta)T(x) - a(\theta))
+\]</span></p>
+<p>logistic 分布的概率密度函数为</p>
+<p><span class="math display">\[
+f(x) = \frac{e^{-(x-u/\gamma)}}{\gamma(1+e^{-(x-u)/\gamma})^{2}}
+\]</span></p>
+<p>转化一下</p>
+<p><span class="math display">\[
+f(x) = exp(-2 log(1+e^{-(x-u)/\gamma})-(x-u)/\gamma - 2log(\gamma))
+\]</span></p>
+<p>该式不能转化为指数分布族的表示，故逻辑斯蒂回归不属于指数分布族</p>
+<h2 id="section-13">6.2</h2>
+<blockquote>
+<p>写出逻辑斯谛回归模型学习的梯度下降算法</p>
+</blockquote>
+<p>逻辑斯蒂回归的对数似然函数为</p>
+<p><span class="math display">\[
+L(w) = \sum_{i=1}^{N}[y_{i}(w*x_{i}) - log(1+exp(w*x_{i}))]
+\]</span></p>
+<p>梯度下降的迭代是</p>
+<p><span class="math display">\[
+w_{j} = w_{j} - \alpha \frac{\partial L(w) }{\partial w_{j}}
+\]</span></p>
+<p><span class="math display">\[
+\frac{\partial L(w) }{\partial w_{j}} = \sum_{i=1}^{N}(y_{i} - \frac{exp(wx_{i})}{1+exp(wx_{i})})*x_{i}^{j} 
+\]</span></p>
+<h2 id="section-14">6.3</h2>
+<h1 id="第八章-提升方法">第八章 提升方法</h1>
+<h2 id="section-15">8.1</h2>
+<blockquote>
+<p>某公司招聘职员考查身体、业务能力、发展潜力这 3 项。身体分为合格1、不合格0两级，业务能力和发展潜力分为上1、中2、下3三级分类为合格1 、不合格-1两类。已知10个人的数据，如下表所示。假设弱分类器为决策树桩。.试用AdaBoost算法学习一个强分类器。</p>
+</blockquote>
 
       
     </div>
@@ -708,8 +747,8 @@ g_{R}(D,A_{4}) = \frac{0.363}{1.565} = 0.232
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/move-kafka-partitons-between-disks/" rel="next" title="Moving Kafka Replica Between Disk">
-                <i class="fa fa-chevron-left"></i> Moving Kafka Replica Between Disk
+              <a href="/利用 Shapley value 计算带宽成本/" rel="next" title="利用 Shapley Value 计算带宽成本">
+                <i class="fa fa-chevron-left"></i> 利用 Shapley Value 计算带宽成本
               </a>
             
           </div>
@@ -718,8 +757,8 @@ g_{R}(D,A_{4}) = \frac{0.363}{1.565} = 0.232
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/go-channel-饿死及优先级/" rel="prev" title="go channel 的饿死和优先级处理">
-                go channel 的饿死和优先级处理 <i class="fa fa-chevron-right"></i>
+              <a href="/无穷数据流的分位数问题/" rel="prev" title="无穷数据流的分位数问题">
+                无穷数据流的分位数问题 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -812,7 +851,7 @@ g_{R}(D,A_{4}) = \frac{0.363}{1.565} = 0.232
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-count">19</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -834,7 +873,7 @@ g_{R}(D,A_{4}) = \frac{0.363}{1.565} = 0.232
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
@@ -901,7 +940,7 @@ g_{R}(D,A_{4}) = \frac{0.363}{1.565} = 0.232
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章-概论"><span class="nav-number">1.</span> <span class="nav-text">第一章 概论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section"><span class="nav-number">1.1.</span> <span class="nav-text">1.1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#努利模型的极大似然估计"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 努利模型的极大似然估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#努利模型的贝叶斯估计"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 努利模型的贝叶斯估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三要素"><span class="nav-number">1.1.3.</span> <span class="nav-text">1.1.3 三要素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-1"><span class="nav-number">1.2.</span> <span class="nav-text">1.2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-感知机"><span class="nav-number">2.</span> <span class="nav-text">第二章 感知机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-2"><span class="nav-number">2.1.</span> <span class="nav-text">2.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-3"><span class="nav-number">2.2.</span> <span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-4"><span class="nav-number">2.3.</span> <span class="nav-text">2.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第三章-knn"><span class="nav-number">3.</span> <span class="nav-text">第三章 kNN</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-5"><span class="nav-number">3.1.</span> <span class="nav-text">3.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-6"><span class="nav-number">3.2.</span> <span class="nav-text">3.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第四章-朴素贝叶斯"><span class="nav-number">4.</span> <span class="nav-text">第四章 朴素贝叶斯</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-7"><span class="nav-number">4.1.</span> <span class="nav-text">4.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-8"><span class="nav-number">4.2.</span> <span class="nav-text">4.2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第五章-决策树"><span class="nav-number">5.</span> <span class="nav-text">第五章 决策树</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-9"><span class="nav-number">5.1.</span> <span class="nav-text">5.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-10"><span class="nav-number">5.2.</span> <span class="nav-text">5.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-11"><span class="nav-number">5.3.</span> <span class="nav-text">5.3</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章-概论"><span class="nav-number">1.</span> <span class="nav-text">第一章 概论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section"><span class="nav-number">1.1.</span> <span class="nav-text">1.1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#努利模型的极大似然估计"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 努利模型的极大似然估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#努利模型的贝叶斯估计"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 努利模型的贝叶斯估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三要素"><span class="nav-number">1.1.3.</span> <span class="nav-text">1.1.3 三要素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-1"><span class="nav-number">1.2.</span> <span class="nav-text">1.2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-感知机"><span class="nav-number">2.</span> <span class="nav-text">第二章 感知机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-2"><span class="nav-number">2.1.</span> <span class="nav-text">2.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-3"><span class="nav-number">2.2.</span> <span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-4"><span class="nav-number">2.3.</span> <span class="nav-text">2.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第三章-knn"><span class="nav-number">3.</span> <span class="nav-text">第三章 kNN</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-5"><span class="nav-number">3.1.</span> <span class="nav-text">3.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-6"><span class="nav-number">3.2.</span> <span class="nav-text">3.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第四章-朴素贝叶斯"><span class="nav-number">4.</span> <span class="nav-text">第四章 朴素贝叶斯</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-7"><span class="nav-number">4.1.</span> <span class="nav-text">4.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-8"><span class="nav-number">4.2.</span> <span class="nav-text">4.2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第五章-决策树"><span class="nav-number">5.</span> <span class="nav-text">第五章 决策树</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-9"><span class="nav-number">5.1.</span> <span class="nav-text">5.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-10"><span class="nav-number">5.2.</span> <span class="nav-text">5.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-11"><span class="nav-number">5.3.</span> <span class="nav-text">5.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第六章-逻辑斯蒂回归与最大熵"><span class="nav-number">6.</span> <span class="nav-text">第六章 逻辑斯蒂回归与最大熵</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-12"><span class="nav-number">6.1.</span> <span class="nav-text">6.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-13"><span class="nav-number">6.2.</span> <span class="nav-text">6.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-14"><span class="nav-number">6.3.</span> <span class="nav-text">6.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第八章-提升方法"><span class="nav-number">7.</span> <span class="nav-text">第八章 提升方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#section-15"><span class="nav-number">7.1.</span> <span class="nav-text">8.1</span></a></li></ol></li></ol></div>
             
 
           </div>

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="streaming,分位数,quantile," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="设想这么一个问题：如何统计一段无穷数据流的八十分位值？ 咋听之下问题很无厘头，总量都未知，谈何分位数？而在实践中这样的需求还挺常见的，比如从实时日志里计算某请求速度字段的百分位值，从而对网络质量有一个大致的评估。 问题的难点在于数据无穷无尽源源不断，而且总量不可提前预估，因为数据到来的速度也是未知的。保留所有数据来计算百分位值代价太过昂贵， O(n) 的空间复杂度显然是不可接受的。 退一步，能不">
+<meta name="keywords" content="streaming,分位数,quantile">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无穷数据流的分位数问题">
+<meta property="og:url" content="http://simonxia.com/无穷数据流的分位数问题/index.html">
+<meta property="og:site_name" content="Simon Xia">
+<meta property="og:description" content="设想这么一个问题：如何统计一段无穷数据流的八十分位值？ 咋听之下问题很无厘头，总量都未知，谈何分位数？而在实践中这样的需求还挺常见的，比如从实时日志里计算某请求速度字段的百分位值，从而对网络质量有一个大致的评估。 问题的难点在于数据无穷无尽源源不断，而且总量不可提前预估，因为数据到来的速度也是未知的。保留所有数据来计算百分位值代价太过昂贵， O(n) 的空间复杂度显然是不可接受的。 退一步，能不">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/流处理中的分位数问题/benchmark.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+<meta property="og:updated_time" content="2018-06-20T10:28:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="无穷数据流的分位数问题">
+<meta name="twitter:description" content="设想这么一个问题：如何统计一段无穷数据流的八十分位值？ 咋听之下问题很无厘头，总量都未知，谈何分位数？而在实践中这样的需求还挺常见的，比如从实时日志里计算某请求速度字段的百分位值，从而对网络质量有一个大致的评估。 问题的难点在于数据无穷无尽源源不断，而且总量不可提前预估，因为数据到来的速度也是未知的。保留所有数据来计算百分位值代价太过昂贵， O(n) 的空间复杂度显然是不可接受的。 退一步，能不">
+<meta name="twitter:image" content="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/流处理中的分位数问题/benchmark.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: 'N6TBEABEYE',
+      apiKey: 'f73e76f8ba22dce62d966cdfa51708fb',
+      indexName: 'myblog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://simonxia.com/无穷数据流的分位数问题/"/>
+
+
+
+
+
+  <title>无穷数据流的分位数问题 | Simon Xia</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Simon Xia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">写程序的少年，走在市井之间</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://simonxia.com/无穷数据流的分位数问题/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Simon Xia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Simon Xia">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">无穷数据流的分位数问题</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-08-05T22:53:58+08:00">
+                2017-08-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/programming/" itemprop="url" rel="index">
+                    <span itemprop="name">programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/无穷数据流的分位数问题/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="无穷数据流的分位数问题/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>设想这么一个问题：如何统计一段无穷数据流的八十分位值？</p>
+<p>咋听之下问题很无厘头，总量都未知，谈何分位数？而在实践中这样的需求还挺常见的，比如从实时日志里计算某请求速度字段的百分位值，从而对网络质量有一个大致的评估。</p>
+<p>问题的难点在于数据无穷无尽源源不断，而且总量不可提前预估，因为数据到来的速度也是未知的。保留所有数据来计算百分位值代价太过昂贵， O(n) 的空间复杂度显然是不可接受的。</p>
+<p>退一步，能不能通过抽样获取数据的一些分布规律，进而对百分位值进行推算呢？看起来很美好，其实经不起推敲，因为对无穷数据流抽样理论上得到的也是无穷数据流，实践上如果抽样密集，内存消耗依然很快，抽样稀疏则误差完全不可控。</p>
+<p>考虑一个相似的问题，计算无穷数据流的 top N. 因为 N 已知，只需维护一个大小为 N 的堆，将数据从堆中流过即可。任意时刻查看堆，堆中数据即为所求。</p>
+<p>类似地，可否设计一个数据结构，内存占用大小在可控范围内，数据结构能给出足够的信息，使得任意时刻对其查询，都能（在一定误差范围内）返回我们想要的百分位值？</p>
+<a id="more"></a>
+<h1 id="一种解法">一种解法</h1>
+<p><a href="https://www.cs.rutgers.edu/~muthu/bquant.pdf" target="_blank" rel="noopener">Cormode, Korn, Muthukrishnan, and Srivastava. “Effective Computation of Biased Quantiles over Data Streams”</a> 设计了一种数据结构很好地平衡了查询精度和内存占用，比较完美地解决了这个问题。</p>
+<p>求解目标：<em>对于 <span class="math inline">\(p\)</span> 分位的数据，我们能容忍的误差是 <span class="math inline">\(\varepsilon\)</span></em></p>
+<p>对于数据流的每个数据，用一个三元组表示，对第 i 个有 <span class="math inline">\(t_{i} = (v_{i}, g_{i}, \Delta_{i})\)</span>，其中 <span class="math inline">\(v_{i}\)</span> 是每个数据的值，<span class="math inline">\(g_{i}\)</span> 表示第 <span class="math inline">\(i\)</span> 个数据的最低可能排名与第 <span class="math inline">\(i-1\)</span> 个数据最低可能排名之差，<span class="math inline">\(\Delta_{i}\)</span> 表示第 i 个数据的最高可能排名与最低可能排名之差。</p>
+<p>对于某个值 <span class="math inline">\(v_{i}\)</span>，令 <span class="math inline">\(r_{i} = \sum_{j=1}^{i-1}g_{i}\)</span>，则 <span class="math inline">\(v_{i}\)</span> 的真实排名在区间 <span class="math inline">\([r_{i} + g_{i}, r_{i} + g_{i} + \Delta_{i}]\)</span> 中。</p>
+<p>另外，任意时刻，对任意数据 <span class="math inline">\(i\)</span> 保持一个约束: <span class="math inline">\(g_{i} + \Delta_{i} \leq f(r_{i}, n)\)</span>， 其中 <span class="math inline">\(f(r_{i}, n) = 2r_{i}\varepsilon\)</span>，n 为已出现的数据总量。</p>
+<h2 id="算法">算法</h2>
+<h3 id="插入">插入</h3>
+<p>对每个新插入的数据 v，在已有数据中寻找满足 <span class="math inline">\(v_{i} &lt; v &lt; v_{i+1}\)</span> 的 <span class="math inline">\(i\)</span>，计算 <span class="math inline">\(r_{i}\)</span>，进而得到三元组 <span class="math inline">\((v, g = 1, \Delta=\left \lfloor f(r_{i}, n) \right \rfloor -1)\)</span></p>
+<p>因为 <span class="math inline">\(v\)</span> 的排名至少比 <span class="math inline">\(v_{i}\)</span> 大 1，故 <span class="math inline">\(g=1\)</span></p>
+<p>注意对最大或最小的数据插入时，<span class="math inline">\(\Delta = 0\)</span></p>
+<h3 id="压缩">压缩</h3>
+<p>每次压缩时，对于相邻的两个数据 <span class="math inline">\((v_{i}, g_{i}, \Delta_{i}), (v_{i+1}, g_{i+1}, \Delta_{i+1})\)</span>，当他们满足 <span class="math inline">\(g_{i} + g_{i+1} + \Delta_{i+1} \leq f(r_{i}, n)\)</span> 时，将其合并为 <span class="math inline">\((v_{i+1}, g_{i} + g_{i+1}, \Delta_{i+1})\)</span></p>
+<p>可见，这个合并对于 <span class="math inline">\(g\)</span> 和 <span class="math inline">\(\Delta\)</span> 的语义是没有改变的</p>
+<h3 id="查询">查询</h3>
+<p>对于一个具体的待查询的百分位 <span class="math inline">\(p, 0 \leq p \leq 1\)</span>，找到满足 <span class="math inline">\(r_{i} + g_{i} + \Delta_{i} &gt; pn + 1/2 * f(pn, n)\)</span> 的最小的 <span class="math inline">\(i\)</span>，则第 <span class="math inline">\(i-1\)</span> 个元素即为所求。</p>
+<h2 id="正确性验证">正确性验证</h2>
+<p>验证从两方面入手 1. 插入和压缩操作均保持了约束条件不变 2. 在约束条件不变的条件下，查询操作正确</p>
+<p>先看第一点，对于每个新元素，<span class="math inline">\(g+\Delta = 1+ \left \lfloor f(r_{i}, n) \right \rfloor -1 &lt;= f(r_{i}, n)\)</span> 约束成立。在新元素插入位置之前的元素，关系不变。在新元素插入之后的元素 <span class="math inline">\(r_{i}\)</span> 比以前大 1，则 <span class="math inline">\(f(r_{i}, n)\)</span> 比以前更大，对这些约束依然成立。对于压缩操作，显然约束成立因为压缩的前提就是满足约束。</p>
+<p>再看查询条件 <span class="math inline">\(r_{i} + g_{i} + \Delta_{i} &gt; pn + 1/2 * f(pn, n)\)</span>，不等式左边表示 <span class="math inline">\(v_{i}\)</span> 可能排名的最大值，右边 <span class="math inline">\(pn\)</span>是理论上的分位值，<span class="math inline">\(pn + 1/2 * f(pn, n)\)</span> 即为在允许误差范围内的最大可能值</p>
+<h2 id="进一步优化">进一步优化</h2>
+<p>对所有分位数用相同的精度有时挺浪费，特别在精度小的场景。有时对于不同的分位数，我们期待不同精度，通常是分位越大精度要求越高，例如对 80 分位值误差要求 1%，对 95 分位值误差要求 0.1%。</p>
+<p>对约束函数优化，假设有若干个配置对 <span class="math inline">\(T = \{(p_{j}, \varepsilon_{j})\}\)</span>，修改约束函数如下</p>
+<p><span class="math display">\[
+\left\{\begin{matrix}
+ f_{j}(r_{i}, n) = \frac{2\varepsilon (n - r_{i})}{1 - p_{j}} &amp; 0 \leq r_{i} \leq p_{j}n  \\
+f_{j}(r_{i}, n) = \frac{2\varepsilon r_{i}}{p_{j}} ,&amp; p_{j}n \leq r_{i} \leq n  
+\end{matrix}\right.
+\]</span></p>
+<p>每次取 <span class="math inline">\(f(r_{i}, n) = min_{j}(f_{j}(r_{i}, n))\)</span>，和之前一样，对任意数据 <span class="math inline">\(i\)</span> 保持一个约束: <span class="math inline">\(g_{i} + \Delta_{i} \leq f(r_{i}, n)\)</span></p>
+<h1 id="实现">实现</h1>
+<p>根据 paper 的思路，我写了一个 golang 的实现 <a href="https://github.com/simon-xia/fuzzyQuantile" target="_blank" rel="noopener">github.com/simon-xia/fuzzyQuantile</a>，采用插入缓存和异步批量保存压缩的方式。</p>
+<p>测试下来性能非常不错。一个 test csae 如下，用我笔记本跑，插入 1000万 数据用时仅 4 秒多，占用内存仅 3143 个单位，相当于 99.96857% 的数据都被过滤掉了。查询精度也符合预期。</p>
+<img src="http://7s1t7r.com1.z0.glb.clouddn.com/images/posts/流处理中的分位数问题/benchmark.png?imageMogr2/auto-orient/blur/1x0/quality/75|watermark/2/text/c2ltb254aWEuY29t/font/bWljcm9zb2Z0IHlhaGVp/fontsize/280/fill/IzAwMDAwMA==/dissolve/52/gravity/SouthEast/dx/10/dy/10|imageslim">
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/streaming/" rel="tag"># streaming</a>
+          
+            <a href="/tags/分位数/" rel="tag"># 分位数</a>
+          
+            <a href="/tags/quantile/" rel="tag"># quantile</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/统计学习方法全部习题解答/" rel="next" title="《统计学习方法》全部习题解答">
+                <i class="fa fa-chevron-left"></i> 《统计学习方法》全部习题解答
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/go-channel-饿死及优先级/" rel="prev" title="go channel 的饿死和优先级处理">
+                go channel 的饿死和优先级处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class="addthis_inline_share_toolbox">
+  <script type = "text/javascript" src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a7333798bdbadf9" async = "async" ></script>
+</div>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="hypercomments_widget"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="Simon Xia" />
+            
+              <p class="site-author-name" itemprop="name">Simon Xia</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/simon-xia" target="_blank" rel="external nofollow" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/2791115/simon-xia" target="_blank" rel="external nofollow" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/simonxia-OMG/answers/by_votes" target="_blank" rel="external nofollow" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:simonxiaOMG@gmail.com" target="_blank" rel="external nofollow" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank" rel="external nofollow">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一种解法"><span class="nav-number">1.</span> <span class="nav-text">一种解法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#算法"><span class="nav-number">1.1.</span> <span class="nav-text">算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#插入"><span class="nav-number">1.1.1.</span> <span class="nav-text">插入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#压缩"><span class="nav-number">1.1.2.</span> <span class="nav-text">压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询"><span class="nav-number">1.1.3.</span> <span class="nav-text">查询</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正确性验证"><span class="nav-number">1.2.</span> <span class="nav-text">正确性验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进一步优化"><span class="nav-number">1.3.</span> <span class="nav-text">进一步优化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现"><span class="nav-number">2.</span> <span class="nav-text">实现</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Simon Xia</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" href="http://hexo.io" rel="external nofollow">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">NexT.Muse</a></div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65177512";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100769, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100769, xid: "无穷数据流的分位数问题/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100769/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

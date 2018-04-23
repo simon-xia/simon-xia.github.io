@@ -4,6 +4,74 @@
 
     
   <url>
+    <loc>http://simonxia.com/%E5%88%A9%E7%94%A8%20Shapley%20value%20%E8%AE%A1%E7%AE%97%E5%B8%A6%E5%AE%BD%E6%88%90%E6%9C%AC/</loc>
+    <lastmod>2018-06-20T10:34:05.000Z</lastmod>
+    <data>
+        <display>
+        <title>利用 Shapley Value 计算带宽成本</title>
+        <pubTime>2017-02-10T12:18:45.000Z</pubTime>
+        
+        <tag>Shapley Value</tag>
+         
+        <tag>带宽成本</tag>
+         
+         
+           
+             
+              <breadCrumb title="programming" url="http://simonxia.com/categories/programming/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://simonxia.com/%E6%97%A0%E7%A9%B7%E6%95%B0%E6%8D%AE%E6%B5%81%E7%9A%84%E5%88%86%E4%BD%8D%E6%95%B0%E9%97%AE%E9%A2%98/</loc>
+    <lastmod>2018-06-20T10:28:59.000Z</lastmod>
+    <data>
+        <display>
+        <title>无穷数据流的分位数问题</title>
+        <pubTime>2017-08-05T14:53:58.000Z</pubTime>
+        
+        <tag>streaming</tag>
+         
+        <tag>分位数</tag>
+         
+        <tag>quantile</tag>
+         
+         
+           
+             
+              <breadCrumb title="programming" url="http://simonxia.com/categories/programming/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://simonxia.com/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E5%85%A8%E9%83%A8%E4%B9%A0%E9%A2%98%E8%A7%A3%E7%AD%94/</loc>
+    <lastmod>2018-06-14T00:29:10.000Z</lastmod>
+    <data>
+        <display>
+        <title>《统计学习方法》全部习题解答</title>
+        <pubTime>2017-03-21T00:56:38.000Z</pubTime>
+        
+        <tag>统计学习方法</tag>
+         
+        <tag>statistics</tag>
+         
+         
+           
+             
+              <breadCrumb title="programming" url="http://simonxia.com/categories/programming/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://simonxia.com/%E8%A1%B0%E5%87%8F%E5%B9%B3%E5%9D%87%E4%B8%8E%E8%A1%B0%E5%87%8F%E6%A0%87%E5%87%86%E5%B7%AE/</loc>
     <lastmod>2018-05-26T23:51:57.000Z</lastmod>
     <data>
@@ -34,28 +102,6 @@
         <pubTime>2016-12-05T04:40:02.000Z</pubTime>
         
         <tag>cache</tag>
-         
-         
-           
-             
-              <breadCrumb title="programming" url="http://simonxia.com/categories/programming/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://simonxia.com/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E5%85%A8%E9%83%A8%E4%B9%A0%E9%A2%98%E8%A7%A3%E7%AD%94/</loc>
-    <lastmod>2018-05-26T16:46:38.000Z</lastmod>
-    <data>
-        <display>
-        <title>《统计学习方法》全部习题解答</title>
-        <pubTime>2017-03-21T00:56:38.000Z</pubTime>
-        
-        <tag>统计学习方法</tag>
-         
-        <tag>statistics</tag>
          
          
            
